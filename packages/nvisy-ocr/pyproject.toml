@@ -1,0 +1,23 @@
+[project]
+name = "nvisy-ocr"
+version = "0.1.0"
+description = "BentoML OCR inference service for nvisy (PaddleOCR PP-OCRv5)"
+readme = "README.md"
+requires-python = "==3.12.*"
+license = "Apache-2.0"
+authors = [{ name = "Nvisy" }]
+dependencies = [
+    "bentoml>=1.4.39,<2",
+    "nvisy-core",
+    # PaddlePaddle has no cp313 wheels yet, hence requires-python ==3.12.*.
+    "paddleocr>=3.0,<4",
+    "paddlepaddle>=3.0,<4",
+    "pillow>=10",
+]
+
+[build-system]
+requires = ["uv_build>=0.6,<0.7"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
