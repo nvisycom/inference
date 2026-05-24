@@ -7,7 +7,7 @@ requires-python = "==3.12.*"
 license = "Apache-2.0"
 authors = [{ name = "Nvisy" }]
 dependencies = [
-    "bentoml>=1.4,<2",
+    "bentoml>=1.4.39,<2",
     "gliner>=0.2.13",
     "nvisy-core",
     # Torch is a transitive dep of gliner; pinned so the image bakes a known

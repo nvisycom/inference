@@ -7,7 +7,7 @@ requires-python = "==3.12.*"
 license = "Apache-2.0"
 authors = [{ name = "Nvisy" }]
 dependencies = [
-    "bentoml>=1.4,<2",
+    "bentoml>=1.4.39,<2",
     "nvisy-core",
     # PaddlePaddle has no cp313 wheels yet, hence requires-python ==3.12.*.
     "paddleocr>=3.0,<4",
