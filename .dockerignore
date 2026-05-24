@@ -1,0 +1,13 @@
+# Keep the build context lean (context is the repo root).
+**/.venv
+**/__pycache__
+**/*.py[codz]
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+.git
+.github
+docker
+models/
+*.md
+!**/README.md
