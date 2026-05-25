@@ -45,9 +45,17 @@ jobs:
       matrix:
         service: [paddle, gliner]
 
+    env:
+      IMAGE: ghcr.io/nvisy/inference-${{ matrix.service }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
 
       - name: Set up Buildx
         uses: docker/setup-buildx-action@v4
@@ -59,23 +67,25 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/nvisy/inference-${{ matrix.service }}
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
+      - name: Sync
+        run: uv sync --locked --package nvisy-${{ matrix.service }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: docker/${{ matrix.service }}.Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # BentoML builds the Bento from the service's Image config and generates
+      # the Dockerfile (`--containerize`). The local image is tagged
+      # nvisy-inference-<service>:<bento-version>; re-tag for GHCR and push.
+      - name: Build and containerize
+        id: bento
+        run: |
+          tag=$(uv run bentoml build \
+            -f packages/nvisy-${{ matrix.service }}/bentofile.yaml \
+            --containerize -o tag .)
+          echo "image_tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Tag and push
+        run: |
+          version="${GITHUB_REF#refs/tags/v}"   # e.g. 1.2.3
+          IFS=. read -r major minor _ <<< "$version"
+          for t in "$version" "$major.$minor" "$major" latest; do
+            docker tag "${{ steps.bento.outputs.image_tag }}" "$IMAGE:$t"
+            docker push "$IMAGE:$t"
+          done
