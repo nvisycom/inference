@@ -26,6 +26,7 @@ from nvisy_core.ocr.v1 import (
     OcrRequest,
     OcrResponse,
     Page,
+    Polygon,
     Word,
 )
 from nvisy_core.runtime import get_logger, request_id, resolve_model
@@ -108,8 +109,12 @@ class OcrService:
     def _recognize_one(self, req: OcrRequest) -> OcrResponse:
         image = _decode_image(req.image)
         result = self.ocr([_to_ndarray(image)])
-        page = _page_from_doctr(result.pages[0], req.confidence_threshold)
-        return OcrResponse(pages=[page], model_id=self.model_id)
+        # We pass one image, so expect one page; guard an empty result instead
+        # of indexing into nothing.
+        pages = [
+            _page_from_doctr(p, req.confidence_threshold) for p in getattr(result, "pages", [])
+        ]
+        return OcrResponse(pages=pages, model_id=self.model_id)
 
 
 def _decode_image(image_b64: str) -> PILImage:
@@ -138,6 +143,10 @@ def _page_from_doctr(page, threshold: float) -> Page:
     ``(height, width)`` in pixels. We scale geometry to pixels and keep the full
     Block -> Line -> Word hierarchy docTR produces. Base docTR has no layout
     classification, so blocks default to BlockKind.TEXT.
+
+    Confidence is only available at word level (docTR), so Line/Block carry no
+    confidence. When confidence filtering drops words, the surviving Line/Block
+    geometry is recomputed from the kept words so geometry and text agree.
     """
     height, width = page.dimensions
 
@@ -146,31 +155,27 @@ def _page_from_doctr(page, threshold: float) -> Page:
         lines: list[Line] = []
         for dl in db.lines:
             words = [
-                Word(
-                    text=dw.value,
-                    confidence=float(dw.confidence),
-                    bbox=_geom_to_bbox(dw.geometry, width, height),
-                )
+                Word(text=dw.value, confidence=float(dw.confidence), bbox=bbox, polygon=poly)
                 for dw in dl.words
                 if dw.confidence >= threshold
+                for bbox, poly in [_geom_to_geometry(dw.geometry, width, height)]
             ]
             if not words:
                 continue
             lines.append(
                 Line(
                     text=" ".join(w.text for w in words),
-                    bbox=_geom_to_bbox(dl.geometry, width, height),
+                    bbox=_enclosing_bbox([w.bbox for w in words]),
                     words=words,
                 )
             )
         if not lines:
             continue
-        block_text = "\n".join(line.text for line in lines)
         blocks.append(
             Block(
-                text=block_text,
+                text="\n".join(line.text for line in lines),
                 kind=BlockKind.TEXT,
-                bbox=_geom_to_bbox(db.geometry, width, height),
+                bbox=_enclosing_bbox([line.bbox for line in lines]),
                 lines=lines,
             )
         )
@@ -178,12 +183,26 @@ def _page_from_doctr(page, threshold: float) -> Page:
     return Page(page_number=1, width=float(width), height=float(height), blocks=blocks)
 
 
-def _geom_to_bbox(geometry, width: int, height: int) -> BoundingBox:
-    """Convert docTR normalized ((xmin,ymin),(xmax,ymax)) to a pixel BoundingBox."""
-    (xmin, ymin), (xmax, ymax) = geometry
-    return BoundingBox(
-        x=xmin * width,
-        y=ymin * height,
-        width=(xmax - xmin) * width,
-        height=(ymax - ymin) * height,
-    )
+def _geom_to_geometry(geometry, width: int, height: int) -> tuple[BoundingBox, Polygon | None]:
+    """Map docTR geometry (normalized) to a pixel bbox plus optional polygon.
+
+    docTR returns either a 2-point box ``((xmin,ymin),(xmax,ymax))`` (straight
+    pages) or a 4-point polygon (rotated pages, ``assume_straight_pages=False``).
+    The bbox is always the axis-aligned extent; the polygon is populated only for
+    the 4-point case.
+    """
+    pts = [(float(x) * width, float(y) * height) for x, y in geometry]
+    xs = [x for x, _ in pts]
+    ys = [y for _, y in pts]
+    bbox = BoundingBox(x=min(xs), y=min(ys), width=max(xs) - min(xs), height=max(ys) - min(ys))
+    polygon: Polygon | None = (pts[0], pts[1], pts[2], pts[3]) if len(pts) == 4 else None
+    return bbox, polygon
+
+
+def _enclosing_bbox(boxes: list[BoundingBox]) -> BoundingBox:
+    """The axis-aligned box enclosing ``boxes`` (non-empty)."""
+    x0 = min(b.x for b in boxes)
+    y0 = min(b.y for b in boxes)
+    x1 = max(b.x + b.width for b in boxes)
+    y1 = max(b.y + b.height for b in boxes)
+    return BoundingBox(x=x0, y=y0, width=x1 - x0, height=y1 - y0)

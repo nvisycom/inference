@@ -67,6 +67,8 @@ class Word(_Model):
 
 class Line(_Model):
     text: str
+    # Confidence is reported at word level; engines that don't aggregate to the
+    # line (e.g. docTR) leave this null.
     confidence: Probability | None = None
     bbox: BoundingBox
     polygon: Polygon | None = None
@@ -98,5 +100,7 @@ class OcrRequest(_Model):
 class OcrResponse(_Model):
     pages: list[Page] = Field(default_factory=list)
     model_id: str = Field(
-        description="Identifier of the model that produced this result, for provenance.",
+        description="Identifier of the model that produced this result, for "
+        "provenance (e.g. the engine's model name/pair). Does not encode the "
+        "engine library version.",
     )

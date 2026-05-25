@@ -257,7 +257,7 @@
       "OcrResponse": {
         "properties": {
           "modelId": {
-            "description": "Identifier of the model that produced this result, for provenance.",
+            "description": "Identifier of the model that produced this result, for provenance (e.g. the engine's model name/pair). Does not encode the engine library version.",
             "title": "Modelid",
             "type": "string"
           },
