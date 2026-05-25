@@ -12,9 +12,9 @@ resolution-markers = [
 [manifest]
 members = [
     "nvisy-core",
+    "nvisy-gliner",
     "nvisy-inference",
-    "nvisy-ner",
-    "nvisy-ocr",
+    "nvisy-paddle",
 ]
 
 [[package]]
@@ -962,6 +962,25 @@ dependencies = [
 requires-dist = [{ name = "pydantic", specifier = ">=2.7,<3" }]
 
 [[package]]
+name = "nvisy-gliner"
+version = "0.1.0"
+source = { editable = "packages/nvisy-gliner" }
+dependencies = [
+    { name = "bentoml" },
+    { name = "gliner" },
+    { name = "nvisy-core" },
+    { name = "torch" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "bentoml", specifier = ">=1.4.39,<2" },
+    { name = "gliner", specifier = ">=0.2.13" },
+    { name = "nvisy-core", editable = "packages/nvisy-core" },
+    { name = "torch", specifier = ">=2.2" },
+]
+
+[[package]]
 name = "nvisy-inference"
 version = "0.1.0"
 source = { virtual = "." }
@@ -983,28 +1002,9 @@ dev = [
 ]
 
 [[package]]
-name = "nvisy-ner"
+name = "nvisy-paddle"
 version = "0.1.0"
-source = { editable = "packages/nvisy-ner" }
-dependencies = [
-    { name = "bentoml" },
-    { name = "gliner" },
-    { name = "nvisy-core" },
-    { name = "torch" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "bentoml", specifier = ">=1.4.39,<2" },
-    { name = "gliner", specifier = ">=0.2.13" },
-    { name = "nvisy-core", editable = "packages/nvisy-core" },
-    { name = "torch", specifier = ">=2.2" },
-]
-
-[[package]]
-name = "nvisy-ocr"
-version = "0.1.0"
-source = { editable = "packages/nvisy-ocr" }
+source = { editable = "packages/nvisy-paddle" }
 dependencies = [
     { name = "bentoml" },
     { name = "nvisy-core" },

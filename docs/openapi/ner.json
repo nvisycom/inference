@@ -1,0 +1,371 @@
+{
+  "components": {
+    "schemas": {
+      "Entity": {
+        "properties": {
+          "end": {
+            "description": "Character offset, exclusive.",
+            "minimum": 0,
+            "title": "End",
+            "type": "integer"
+          },
+          "label": {
+            "description": "The requested label this entity matched.",
+            "title": "Label",
+            "type": "string"
+          },
+          "score": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Score",
+            "type": "number"
+          },
+          "start": {
+            "description": "Character offset, inclusive.",
+            "minimum": 0,
+            "title": "Start",
+            "type": "integer"
+          },
+          "text": {
+            "description": "The matched substring, text[start:end].",
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "label",
+          "score",
+          "start",
+          "end"
+        ],
+        "title": "Entity",
+        "type": "object"
+      },
+      "InternalServerError": {
+        "description": "Internal Server Error",
+        "properties": {
+          "detail": {
+            "title": "Error Detail",
+            "type": "string"
+          },
+          "error": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "InternalServerError",
+        "type": "object"
+      },
+      "InvalidArgument": {
+        "description": "Bad Request",
+        "properties": {
+          "detail": {
+            "title": "Error Detail",
+            "type": "string"
+          },
+          "error": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "InvalidArgument",
+        "type": "object"
+      },
+      "NerRequest": {
+        "properties": {
+          "labels": {
+            "description": "Zero-shot entity labels to extract (lower/title case).",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Labels",
+            "type": "array"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "BCP-47 language hint (advisory).",
+            "title": "Language"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "threshold": {
+            "default": 0.5,
+            "description": "Minimum score for an entity to be returned.",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Threshold",
+            "type": "number"
+          }
+        },
+        "required": [
+          "text",
+          "labels"
+        ],
+        "title": "NerRequest",
+        "type": "object"
+      },
+      "NerResponse": {
+        "properties": {
+          "entities": {
+            "items": {
+              "$ref": "#/components/schemas/Entity"
+            },
+            "title": "Entities",
+            "type": "array"
+          }
+        },
+        "title": "NerResponse",
+        "type": "object"
+      },
+      "NotFound": {
+        "description": "Not Found",
+        "properties": {
+          "detail": {
+            "title": "Error Detail",
+            "type": "string"
+          },
+          "error": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "NotFound",
+        "type": "object"
+      },
+      "TaskStatusResponse": {
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "executed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Executed At"
+          },
+          "status": {
+            "enum": [
+              "in_progress",
+              "success",
+              "failure",
+              "cancelled"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "status",
+          "created_at",
+          "executed_at"
+        ],
+        "title": "TaskStatusResponse",
+        "type": "object"
+      },
+      "recognize__Input": {
+        "properties": {
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/NerRequest"
+            },
+            "title": "Requests",
+            "type": "array"
+          }
+        },
+        "required": [
+          "requests"
+        ],
+        "title": "recognize__Input",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "contact": {
+      "email": "contact@bentoml.com",
+      "name": "BentoML Team"
+    },
+    "description": "# nvisy-inference-gliner:dev\n\n[![pypi_status](https://img.shields.io/badge/BentoML-1.4.39-informational)](https://pypi.org/project/BentoML)\n[![documentation_status](https://readthedocs.org/projects/bentoml/badge/?version=latest)](https://docs.bentoml.com/)\n[![join_slack](https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack)](https://l.bentoml.com/join-slack-swagger)\n[![BentoML GitHub Repo](https://img.shields.io/github/stars/bentoml/bentoml?style=social)](https://github.com/bentoml/BentoML)\n[![Twitter Follow](https://img.shields.io/twitter/follow/bentomlai?label=Follow%20BentoML&style=social)](https://twitter.com/bentomlai)\n\nThis is a Machine Learning Service created with BentoML.\n\n## Help\n\n* [\ud83d\udcd6 Documentation](https://docs.bentoml.com/en/latest/): Learn how to use BentoML.\n* [\ud83d\udcac Community](https://l.bentoml.com/join-slack-swagger): Join the BentoML Slack community.\n* [\ud83d\udc1b GitHub Issues](https://github.com/bentoml/BentoML/issues): Report bugs and feature requests.\n* Tip: you can also [customize this README](https://docs.bentoml.com/en/latest/reference/bentoml/bento-build-options.html#description).\n",
+    "title": "nvisy-inference-gliner",
+    "version": "None"
+  },
+  "openapi": "3.0.2",
+  "paths": {
+    "/healthz": {
+      "get": {
+        "description": "Health check endpoint. Expecting an empty response with status code <code>200</code> when the service is in health state. The <code>/healthz</code> endpoint is <b>deprecated</b>. (since Kubernetes v1.16)",
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          }
+        },
+        "tags": [
+          "Infrastructure"
+        ]
+      }
+    },
+    "/livez": {
+      "get": {
+        "description": "Health check endpoint for Kubernetes. Healthy endpoint responses with a <code>200</code> OK status.",
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          }
+        },
+        "tags": [
+          "Infrastructure"
+        ]
+      }
+    },
+    "/metrics": {
+      "get": {
+        "description": "Prometheus metrics endpoint. The <code>/metrics</code> responses with a <code>200</code>. The output can then be used by a Prometheus sidecar to scrape the metrics of the service.",
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          }
+        },
+        "tags": [
+          "Infrastructure"
+        ]
+      }
+    },
+    "/readyz": {
+      "get": {
+        "description": "A <code>200</code> OK status from <code>/readyz</code> endpoint indicated the service is ready to accept traffic. From that point and onward, Kubernetes will use <code>/livez</code> endpoint to perform periodic health checks.",
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          }
+        },
+        "tags": [
+          "Infrastructure"
+        ]
+      }
+    },
+    "/recognize": {
+      "post": {
+        "description": "",
+        "operationId": "nvisy-inference-gliner__recognize",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "requests": {
+                    "items": {
+                      "$ref": "#/components/schemas/NerRequest"
+                    },
+                    "title": "Requests",
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "requests"
+                ],
+                "title": "Input",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/NerResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidArgument"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFound"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InternalServerError"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Service APIs"
+        ],
+        "x-bentoml-name": "recognize"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "."
+    }
+  ],
+  "tags": [
+    {
+      "description": "BentoML Service API endpoints for inference.",
+      "name": "Service APIs"
+    },
+    {
+      "description": "Common infrastructure endpoints for observability.",
+      "name": "Infrastructure"
+    }
+  ]
+}

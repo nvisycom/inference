@@ -1,21 +1,21 @@
 """NER inference service (GLiNER) exposed over HTTP via BentoML.
 
-Scaffold stub — GLiNER wiring is filled in by a follow-up. Request/response
-types come from ``nvisy_core.ner`` (the shared wire contract).
+The default implementation of the NER wire contract (``nvisy_core.ner.v1``).
+Scaffold stub — GLiNER wiring is filled in by a follow-up.
 
 Run locally::
 
-    uv run bentoml serve nvisy_ner.service:NerService --reload
+    uv run bentoml serve nvisy_gliner.service:NerService --reload
 """
 
 from __future__ import annotations
 
 import bentoml
-from nvisy_core.ner import NerRequest, NerResponse
+from nvisy_core.ner.v1 import NerRequest, NerResponse
 
 
 @bentoml.service(
-    name="nvisy-inference-ner",
+    name="nvisy-inference-gliner",
     resources={"cpu": "2"},
     traffic={"timeout": 60},
 )

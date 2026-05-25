@@ -1,13 +1,57 @@
-# Keep the build context lean (context is the repo root).
-**/.venv
-**/__pycache__
-**/*.py[codz]
-**/.pytest_cache
-**/.ruff_cache
-**/.mypy_cache
+# OS
+Thumbs.db
+.DS_Store
+
+# IDE and Editors
+.vs/
+.vscode/
+.idea/
+.zed/
+
+# VCS & CI
 .git
 .github
-docker
-models/
+
+# Python
+__pycache__/
+*.py[codz]
+*.so
+.venv/
+venv/
+*.egg-info/
+
+# Build output
+dist/
+build/
+wheels/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Documentation
+docs/
 *.md
-!**/README.md
+!packages/*/README.md
+
+# Environment files
+.env*
+!.env.example
+
+# Logs
+logs/
+*.log
+*.log*
+
+# Backup and temporary files
+*.bak
+*.backup
+*.tmp
+tmp/
+temp/
+
+# Other
+.ignore*/
+.claude
+CLAUDE.md

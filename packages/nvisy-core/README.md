@@ -1,17 +1,42 @@
 # nvisy-core
 
-Shared wire-contract schema for the nvisy inference services. The OCR and NER
-services both depend on this package for their request/response types, so the
-HTTP contract is defined in exactly one place on the Python side.
+[![Build](https://img.shields.io/github/actions/workflow/status/nvisycom/inference/build.yml?branch=main&label=build%20%26%20test&style=flat-square)](https://github.com/nvisycom/inference/actions/workflows/build.yml)
 
-> Per the ADR ([nvisycom/runtime#194](https://github.com/nvisycom/runtime/issues/194)),
-> the Rust runtime (`nvisy-inference-client`) is the ultimate source of truth;
-> these models mirror it. JSON Schemas are exported under [`../../proto/`](../../proto).
+Shared wire-contract types for the Nvisy inference services. The OCR and NER
+services both depend on this package, so the HTTP contract is defined once on
+the Python side.
 
-## Modules
+## Overview
 
-- `nvisy_core.ocr` — OCR contract (`Page → Block → Line → Word`).
-- `nvisy_core.ner` — NER contract (`Entity` with labels, score, char offsets).
+Versioned pydantic models describe each service's request and response shapes.
+Import a specific version explicitly:
 
-> **Status:** scaffold. Types below are illustrative placeholders, finalized in
-> the contract-design follow-up.
+- `nvisy_core.ocr.v1` — OCR contract (`Page → Block → Line → Word`, geometry as
+  axis-aligned `BoundingBox` plus optional polygon).
+- `nvisy_core.ner.v1` — NER contract (`Entity` with label, score, and character
+  offsets).
+
+The wire is camelCase, mirroring the runtime's serde `rename_all = "camelCase"`.
+The Rust runtime (`nvisy-inference-client`) is the ultimate source of truth;
+these models mirror it. Machine-readable OpenAPI specs are generated from the
+services into [`docs/openapi/`](../../docs/openapi) and are the contract for
+bring-your-own-inference implementers.
+
+## Documentation
+
+See [`docs/`](../../docs/) for the generated OpenAPI specs and contract
+documentation.
+
+## Changelog
+
+See [CHANGELOG.md](../../CHANGELOG.md) for release notes and version history.
+
+## License
+
+Apache 2.0 License, see [LICENSE.txt](../../LICENSE.txt)
+
+## Support
+
+- **Documentation**: [docs.nvisy.com](https://docs.nvisy.com)
+- **Issues**: [GitHub Issues](https://github.com/nvisycom/inference/issues)
+- **Email**: [support@nvisy.com](mailto:support@nvisy.com)
