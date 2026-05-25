@@ -1,20 +1,18 @@
 [project]
-name = "nvisy-paddle"
+name = "nvisy-doctr"
 version = "0.1.0"
-description = "Default OCR inference service for nvisy (PaddleOCR PP-OCRv5)"
+description = "Default OCR inference service for nvisy (docTR)"
 readme = "README.md"
 requires-python = "==3.12.*"
 license = "Apache-2.0"
 authors = [{ name = "Nvisy" }]
 dependencies = [
     "bentoml>=1.4.39,<2",
-    "numpy>=1.26",
     "nvisy-core",
-    # PaddlePaddle has no cp313 wheels yet, hence requires-python ==3.12.*.
-    "paddleocr>=3.0,<4",
-    "paddlepaddle>=3.0,<4",
     "pillow>=10",
     "prometheus-client>=0.20",
+    # docTR with the PyTorch backend; provides detection + recognition models.
+    "python-doctr[torch]>=1.0,<2",
 ]
 
 [build-system]

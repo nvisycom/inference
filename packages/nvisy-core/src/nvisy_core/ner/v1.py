@@ -18,15 +18,11 @@ models mirror it. The wire is camelCase to match the runtime's serde
 
 from __future__ import annotations
 
-from typing import Annotated
-
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
 from nvisy_core.entity import EntityKind
-
-# A probability/score in the closed unit interval.
-Probability = Annotated[float, Field(ge=0.0, le=1.0)]
+from nvisy_core.types import Probability
 
 
 class _Model(BaseModel):

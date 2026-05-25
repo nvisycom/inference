@@ -15,8 +15,8 @@ They are the **default** implementations of the OCR and NER wire contracts —
 named after the engine they wrap, since the contract (not the engine) is what
 the runtime depends on:
 
-- **`nvisy-paddle`** ([`packages/nvisy-paddle`](packages/nvisy-paddle)) —
-  PaddleOCR PP-OCRv5 (OCR contract), published as `ghcr.io/nvisy/inference-paddle`.
+- **`nvisy-doctr`** ([`packages/nvisy-doctr`](packages/nvisy-doctr)) —
+  docTR (OCR contract), published as `ghcr.io/nvisy/inference-doctr`.
 - **`nvisy-gliner`** ([`packages/nvisy-gliner`](packages/nvisy-gliner)) —
   GLiNER (NER contract), published as `ghcr.io/nvisy/inference-gliner`.
 
@@ -50,7 +50,7 @@ Common tasks are wrapped in the [`Makefile`](Makefile) (`make help` to list):
 
 ```bash
 make bento            # install BentoML + workspace deps
-make serve-paddle     # serve the OCR service locally (or serve-gliner)
+make serve-doctr      # serve the OCR service locally (or serve-gliner)
 make build            # build both Bentos
 make containerize     # build + containerize into local Docker images
 make generate         # regenerate OpenAPI specs + per-service requirements
@@ -61,10 +61,10 @@ make ci               # lint + drift checks + tests
 
 ```yaml
 services:
-  inference-paddle:
-    image: ghcr.io/nvisy/inference-paddle:1.0
+  inference-doctr:
+    image: ghcr.io/nvisy/inference-doctr:1.0
     volumes:
-      - ./my-paddleocr-weights:/models   # optional: BYO weights
+      - ./my-doctr-weights:/models   # optional: BYO weights
   inference-gliner:
     image: ghcr.io/nvisy/inference-gliner:1.0
     volumes:

@@ -6,6 +6,11 @@
           "bbox": {
             "$ref": "#/components/schemas/BoundingBox"
           },
+          "kind": {
+            "$ref": "#/components/schemas/BlockKind",
+            "default": "text",
+            "description": "Layout kind of the block."
+          },
           "lines": {
             "items": {
               "$ref": "#/components/schemas/Line"
@@ -25,14 +30,27 @@
         "title": "Block",
         "type": "object"
       },
+      "BlockKind": {
+        "description": "Layout kind of a block. Mirrors the runtime's ``BlockKind``.",
+        "enum": [
+          "text",
+          "table",
+          "figure",
+          "other"
+        ],
+        "title": "BlockKind",
+        "type": "string"
+      },
       "BoundingBox": {
         "description": "Axis-aligned box in image pixels, origin top-left.",
         "properties": {
           "height": {
+            "minimum": 0.0,
             "title": "Height",
             "type": "number"
           },
           "width": {
+            "minimum": 0.0,
             "title": "Width",
             "type": "number"
           },
@@ -112,19 +130,62 @@
           "polygon": {
             "anyOf": [
               {
-                "items": {
-                  "maxItems": 2,
-                  "minItems": 2,
-                  "prefixItems": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "type": "number"
-                    }
-                  ],
-                  "type": "array"
-                },
+                "maxItems": 4,
+                "minItems": 4,
+                "prefixItems": [
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  }
+                ],
                 "type": "array"
               },
               {
@@ -195,6 +256,11 @@
       },
       "OcrResponse": {
         "properties": {
+          "modelId": {
+            "description": "Identifier of the model that produced this result, for provenance.",
+            "title": "Modelid",
+            "type": "string"
+          },
           "pages": {
             "items": {
               "$ref": "#/components/schemas/Page"
@@ -203,6 +269,9 @@
             "type": "array"
           }
         },
+        "required": [
+          "modelId"
+        ],
         "title": "OcrResponse",
         "type": "object"
       },
@@ -317,19 +386,62 @@
           "polygon": {
             "anyOf": [
               {
-                "items": {
-                  "maxItems": 2,
-                  "minItems": 2,
-                  "prefixItems": [
-                    {
-                      "type": "number"
-                    },
-                    {
-                      "type": "number"
-                    }
-                  ],
-                  "type": "array"
-                },
+                "maxItems": 4,
+                "minItems": 4,
+                "prefixItems": [
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  },
+                  {
+                    "maxItems": 2,
+                    "minItems": 2,
+                    "prefixItems": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "number"
+                      }
+                    ],
+                    "type": "array"
+                  }
+                ],
                 "type": "array"
               },
               {
@@ -337,6 +449,7 @@
               }
             ],
             "default": null,
+            "description": "4-point polygon, present when the engine reports rotated regions.",
             "title": "Polygon"
           },
           "text": {
@@ -374,8 +487,8 @@
       "email": "contact@bentoml.com",
       "name": "BentoML Team"
     },
-    "description": "# nvisy-inference-paddle:dev\n\n[![pypi_status](https://img.shields.io/badge/BentoML-1.4.39-informational)](https://pypi.org/project/BentoML)\n[![documentation_status](https://readthedocs.org/projects/bentoml/badge/?version=latest)](https://docs.bentoml.com/)\n[![join_slack](https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack)](https://l.bentoml.com/join-slack-swagger)\n[![BentoML GitHub Repo](https://img.shields.io/github/stars/bentoml/bentoml?style=social)](https://github.com/bentoml/BentoML)\n[![Twitter Follow](https://img.shields.io/twitter/follow/bentomlai?label=Follow%20BentoML&style=social)](https://twitter.com/bentomlai)\n\nThis is a Machine Learning Service created with BentoML.\n\n## Help\n\n* [\ud83d\udcd6 Documentation](https://docs.bentoml.com/en/latest/): Learn how to use BentoML.\n* [\ud83d\udcac Community](https://l.bentoml.com/join-slack-swagger): Join the BentoML Slack community.\n* [\ud83d\udc1b GitHub Issues](https://github.com/bentoml/BentoML/issues): Report bugs and feature requests.\n* Tip: you can also [customize this README](https://docs.bentoml.com/en/latest/reference/bentoml/bento-build-options.html#description).\n",
-    "title": "nvisy-inference-paddle",
+    "description": "# nvisy-inference-doctr:dev\n\n[![pypi_status](https://img.shields.io/badge/BentoML-1.4.39-informational)](https://pypi.org/project/BentoML)\n[![documentation_status](https://readthedocs.org/projects/bentoml/badge/?version=latest)](https://docs.bentoml.com/)\n[![join_slack](https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack)](https://l.bentoml.com/join-slack-swagger)\n[![BentoML GitHub Repo](https://img.shields.io/github/stars/bentoml/bentoml?style=social)](https://github.com/bentoml/BentoML)\n[![Twitter Follow](https://img.shields.io/twitter/follow/bentomlai?label=Follow%20BentoML&style=social)](https://twitter.com/bentomlai)\n\nThis is a Machine Learning Service created with BentoML.\n\n## Help\n\n* [\ud83d\udcd6 Documentation](https://docs.bentoml.com/en/latest/): Learn how to use BentoML.\n* [\ud83d\udcac Community](https://l.bentoml.com/join-slack-swagger): Join the BentoML Slack community.\n* [\ud83d\udc1b GitHub Issues](https://github.com/bentoml/BentoML/issues): Report bugs and feature requests.\n* Tip: you can also [customize this README](https://docs.bentoml.com/en/latest/reference/bentoml/bento-build-options.html#description).\n",
+    "title": "nvisy-inference-doctr",
     "version": "None"
   },
   "openapi": "3.0.2",
@@ -435,7 +548,7 @@
     "/recognize": {
       "post": {
         "description": "",
-        "operationId": "nvisy-inference-paddle__recognize",
+        "operationId": "nvisy-inference-doctr__recognize",
         "requestBody": {
           "content": {
             "application/json": {
