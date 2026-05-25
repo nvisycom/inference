@@ -14,14 +14,24 @@ come from [`nvisy_core.ocr.v1`](../nvisy-core), and the generated contract lives
 at [`docs/openapi/ocr.json`](../../docs/openapi/ocr.json). Any service that
 speaks the same contract can replace it (bring-your-own-inference).
 
+PP-OCRv5 is multilingual (106 languages). By default it loads PaddleOCR's
+general recognition model — Simplified/Traditional Chinese, Pinyin, English, and
+Japanese — and `NVISY_OCR_LANG` selects a specific language model when needed.
+The language is chosen once at startup (one model per container).
+
 BentoML batches concurrent calls, so the HTTP body wraps the list:
 `{"requests": [ { "image": "<base64>", "confidenceThreshold": 0.5 } ]}`; the
 response is a JSON array of `OcrResponse`.
 
 ### Configuration
 
-- `NVISY_MODEL_PATH` — path to PaddleOCR weights. Defaults to `/models` when
-  that mount is non-empty, otherwise downloads the PP-OCRv5 English models.
+- `NVISY_MODEL_PATH` — filesystem path to PaddleOCR weights (used as the
+  detection + recognition model dir). Takes precedence; also satisfied by
+  mounting weights at `/models`.
+- `NVISY_MODEL_NAME` — OCR version to load when no path is given (e.g. `PP-OCRv4`).
+  Defaults to `PP-OCRv5`.
+- `NVISY_OCR_LANG` — recognition language model to load (e.g. `korean`, `fr`,
+  `cyrillic`). Unset uses PaddleOCR's general multilingual default.
 - `LOG_LEVEL` — logging level (default `INFO`).
 
 ```bash

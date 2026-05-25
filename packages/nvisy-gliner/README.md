@@ -25,8 +25,10 @@ the response is a JSON array of `NerResponse`.
 
 ### Configuration
 
-- `NVISY_MODEL_PATH` — path to GLiNER weights. Defaults to `/models` when that
-  mount is non-empty, otherwise downloads `urchade/gliner_multi-v2.1`.
+- `NVISY_MODEL_PATH` — filesystem path to GLiNER weights. Takes precedence; also
+  satisfied by mounting weights at `/models`.
+- `NVISY_MODEL_NAME` — model id to load/download when no path is given (e.g.
+  `knowledgator/gliner-pii-large-v1.0`). Defaults to `urchade/gliner_multi-v2.1`.
 - `LOG_LEVEL` — logging level (default `INFO`).
 
 ```bash

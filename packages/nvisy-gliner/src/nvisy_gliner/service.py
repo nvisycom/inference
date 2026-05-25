@@ -12,14 +12,15 @@ from __future__ import annotations
 import bentoml
 from bentoml.exceptions import ServiceUnavailable
 from nvisy_core.ner.v1 import Entity, NerRequest, NerResponse
-from nvisy_core.runtime import get_logger, request_id, resolve_model_path
+from nvisy_core.runtime import get_logger, request_id, resolve_model
 from prometheus_client import Histogram
 
 from nvisy_gliner.label_map import DEFAULT_LABEL_MAP, LabelMap
 
 logger = get_logger("nvisy.gliner")
 
-# Default model when no weights are mounted (see resolve_model_path).
+# Default model id (NVISY_MODEL_NAME overrides; NVISY_MODEL_PATH / /models mount
+# overrides with on-disk weights). See nvisy_core.runtime.resolve_model.
 DEFAULT_MODEL = "urchade/gliner_multi-v2.1"
 
 # prometheus_client directly (bentoml.metrics is deprecated in 1.4); BentoML
@@ -45,7 +46,7 @@ image = bentoml.images.Image(python_version="3.12", lock_python_packages=False).
     image=image,
     resources={"cpu": "2"},
     traffic={"timeout": 60},
-    envs=[{"name": "NVISY_MODEL_PATH"}, {"name": "LOG_LEVEL"}],
+    envs=[{"name": "NVISY_MODEL_PATH"}, {"name": "NVISY_MODEL_NAME"}, {"name": "LOG_LEVEL"}],
 )
 class NerService:
     def __init__(self) -> None:
@@ -54,7 +55,7 @@ class NerService:
         # Owns the translation between the canonical EntityKind taxonomy and
         # GLiNER's free-text labels — see nvisy_gliner.label_map.
         self.label_map: LabelMap = DEFAULT_LABEL_MAP
-        model = resolve_model_path(DEFAULT_MODEL)
+        model = resolve_model(DEFAULT_MODEL)
         logger.info("loading GLiNER (model=%s)", model)
         self.model = GLiNER.from_pretrained(model)
         logger.info("GLiNER ready")

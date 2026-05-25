@@ -12,12 +12,14 @@ from __future__ import annotations
 import base64
 import binascii
 import io
+import os
+import os.path
 from typing import TYPE_CHECKING
 
 import bentoml
 from bentoml.exceptions import InvalidArgument, ServiceUnavailable
 from nvisy_core.ocr.v1 import Block, BoundingBox, Line, OcrRequest, OcrResponse, Page, Word
-from nvisy_core.runtime import get_logger, request_id, resolve_model_path
+from nvisy_core.runtime import get_logger, request_id, resolve_model
 from prometheus_client import Histogram
 
 if TYPE_CHECKING:
@@ -25,7 +27,8 @@ if TYPE_CHECKING:
 
 logger = get_logger("nvisy.paddle")
 
-# Default model when no weights are mounted (see resolve_model_path).
+# Default OCR version (NVISY_MODEL_NAME overrides; NVISY_MODEL_PATH / /models
+# mount overrides with on-disk weights). See nvisy_core.runtime.resolve_model.
 DEFAULT_MODEL = "PP-OCRv5"
 
 # Effective batch size, to see whether adaptive batching actually fills.
@@ -57,22 +60,43 @@ image = (
     resources={"cpu": "2"},
     # ADR default; profile and tune later.
     traffic={"timeout": 60},
-    envs=[{"name": "NVISY_MODEL_PATH"}, {"name": "LOG_LEVEL"}],
+    envs=[
+        {"name": "NVISY_MODEL_PATH"},
+        {"name": "NVISY_MODEL_NAME"},
+        {"name": "NVISY_OCR_LANG"},
+        {"name": "LOG_LEVEL"},
+    ],
 )
 class OcrService:
     def __init__(self) -> None:
         from paddleocr import PaddleOCR
 
-        model = resolve_model_path(DEFAULT_MODEL)
-        logger.info("loading PaddleOCR (model=%s)", model)
-        # PP-OCRv5, English, detection+recognition only (no doc orientation /
-        # unwarping — the runtime handles page geometry upstream).
-        self.ocr = PaddleOCR(
-            lang="en",
-            ocr_version=DEFAULT_MODEL,
-            use_doc_orientation_classify=False,
-            use_doc_unwarping=False,
-        )
+        model = resolve_model(DEFAULT_MODEL)
+        # PP-OCRv5 is multilingual (106 languages). lang selects the recognition
+        # model at init (one per process); unset uses PaddleOCR's default model,
+        # which covers Simplified/Traditional Chinese, Pinyin, English and
+        # Japanese. NVISY_OCR_LANG picks a specific language model (e.g.
+        # "korean", "fr", "cyrillic").
+        lang = os.getenv("NVISY_OCR_LANG")
+        logger.info("loading PaddleOCR (model=%s, lang=%s)", model, lang or "<default>")
+        # Detection + recognition only — no doc orientation / unwarping (the
+        # runtime handles page geometry upstream). A resolved value that is an
+        # existing directory is a mounted/BYO weights dir; otherwise it's an OCR
+        # version like "PP-OCRv5".
+        common: dict = {
+            "use_doc_orientation_classify": False,
+            "use_doc_unwarping": False,
+        }
+        if lang:
+            common["lang"] = lang
+        if os.path.isdir(model):
+            self.ocr = PaddleOCR(
+                text_detection_model_dir=model,
+                text_recognition_model_dir=model,
+                **common,
+            )
+        else:
+            self.ocr = PaddleOCR(ocr_version=model, **common)
         logger.info("PaddleOCR ready")
 
     @bentoml.api(batchable=True, max_batch_size=8, max_latency_ms=120)

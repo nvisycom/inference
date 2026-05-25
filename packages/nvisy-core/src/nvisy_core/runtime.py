@@ -13,26 +13,35 @@ from pathlib import Path
 
 # Where mounted/BYO weights are expected (see the README docker-compose).
 DEFAULT_MODEL_DIR = "/models"
-# Env var a deployment sets to point at custom weights.
+# Filesystem path to pre-fetched/mounted weights. Takes precedence over the name.
 MODEL_PATH_ENV = "NVISY_MODEL_PATH"
+# Model identifier to load/download (e.g. a Hugging Face repo id, or a
+# framework-specific name like an OCR version) when no path is given.
+MODEL_NAME_ENV = "NVISY_MODEL_NAME"
 # Header the Rust runtime sends to correlate a request across services.
 REQUEST_ID_HEADER = "x-request-id"
 
 
-def resolve_model_path(default_model: str) -> str:
-    """Resolve the model to load for bring-your-own-weights.
+def resolve_model(default_name: str) -> str:
+    """Resolve which model a service should load (bring-your-own-weights).
 
-    Returns ``$NVISY_MODEL_PATH`` if set, else ``/models`` when it exists and is
-    non-empty (mounted weights), else ``default_model`` — a model id the runtime
-    downloads (e.g. a Hugging Face repo) for the zero-config case.
+    Precedence:
+
+    1. ``$NVISY_MODEL_PATH`` — a filesystem path to weights, if set.
+    2. ``/models`` — when mounted and non-empty (the conventional BYO mount).
+    3. ``$NVISY_MODEL_NAME`` — a model identifier to load/download.
+    4. ``default_name`` — the service's built-in default identifier.
+
+    Returns either a local path (cases 1-2) or a model identifier (cases 3-4);
+    both PaddleOCR and ``GLiNER.from_pretrained`` accept either form.
     """
-    explicit = os.getenv(MODEL_PATH_ENV)
-    if explicit:
-        return explicit
+    path = os.getenv(MODEL_PATH_ENV)
+    if path:
+        return path
     mounted = Path(DEFAULT_MODEL_DIR)
     if mounted.is_dir() and any(mounted.iterdir()):
         return str(mounted)
-    return default_model
+    return os.getenv(MODEL_NAME_ENV) or default_name
 
 
 def get_logger(name: str) -> logging.Logger:
