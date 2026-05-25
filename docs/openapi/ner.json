@@ -9,10 +9,9 @@
             "title": "End",
             "type": "integer"
           },
-          "label": {
-            "description": "The requested label this entity matched.",
-            "title": "Label",
-            "type": "string"
+          "kind": {
+            "$ref": "#/components/schemas/EntityKind",
+            "description": "The canonical kind this entity was classified as."
           },
           "score": {
             "maximum": 1.0,
@@ -34,13 +33,85 @@
         },
         "required": [
           "text",
-          "label",
+          "kind",
           "score",
           "start",
           "end"
         ],
         "title": "Entity",
         "type": "object"
+      },
+      "EntityKind": {
+        "description": "Specific kind of entity. Each kind maps to one :class:`EntityCategory`.",
+        "enum": [
+          "person_name",
+          "date_of_birth",
+          "government_id",
+          "tax_id",
+          "drivers_license",
+          "passport_number",
+          "national_insurance_number",
+          "vehicle_id",
+          "license_plate",
+          "email_address",
+          "phone_number",
+          "address",
+          "postal_code",
+          "url",
+          "age",
+          "gender",
+          "ethnicity",
+          "religion",
+          "nationality",
+          "citizenship",
+          "language",
+          "payment_card",
+          "card_security_code",
+          "card_expiry",
+          "bank_account",
+          "bank_routing",
+          "iban",
+          "swift_code",
+          "crypto_address",
+          "amount",
+          "medical_id",
+          "insurance_id",
+          "prescription_id",
+          "diagnosis",
+          "medication",
+          "fingerprint",
+          "voiceprint",
+          "retina_scan",
+          "facial_geometry",
+          "password",
+          "api_key",
+          "auth_token",
+          "private_key",
+          "ip_address",
+          "mac_address",
+          "device_id",
+          "username",
+          "coordinates",
+          "geolocation_metadata",
+          "face",
+          "handwriting",
+          "signature",
+          "logo",
+          "barcode",
+          "organization_name",
+          "department_name",
+          "facility_name",
+          "case_number",
+          "internal_id",
+          "date_time",
+          "event",
+          "occupation",
+          "product",
+          "quantity",
+          "unresolved"
+        ],
+        "title": "EntityKind",
+        "type": "string"
       },
       "InternalServerError": {
         "description": "Internal Server Error",
@@ -80,13 +151,13 @@
       },
       "NerRequest": {
         "properties": {
-          "labels": {
-            "description": "Zero-shot entity labels to extract (lower/title case).",
+          "kinds": {
+            "description": "Entity kinds to extract. The service maps these to its model's labels.",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/EntityKind"
             },
             "minItems": 1,
-            "title": "Labels",
+            "title": "Kinds",
             "type": "array"
           },
           "language": {
@@ -117,7 +188,7 @@
         },
         "required": [
           "text",
-          "labels"
+          "kinds"
         ],
         "title": "NerRequest",
         "type": "object"

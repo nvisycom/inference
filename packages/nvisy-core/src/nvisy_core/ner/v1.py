@@ -1,9 +1,13 @@
 """NER wire contract, version 1.
 
-Zero-shot named-entity recognition: the request supplies the candidate
-``labels`` at inference time (GLiNER is label-agnostic), and the response
-returns matched entities with a label, score, and character offsets into the
-request text.
+Zero-shot named-entity recognition. The request supplies the entity *kinds* to
+look for (from the canonical :class:`~nvisy_core.entity.EntityKind` taxonomy);
+the service maps those to its model's labels, runs inference, and returns
+matched entities classified back into the taxonomy. Because the service owns the
+label mapping, swapping the underlying model never changes the wire contract.
+
+The response carries the ``kind`` only — the :class:`EntityCategory` is
+derivable from it (``kind.category``) and can never disagree.
 
 The Rust runtime (``nvisy-inference-client``) is the source of truth; these
 models mirror it. The wire is camelCase to match the runtime's serde
@@ -15,6 +19,8 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
+from nvisy_core.entity import EntityKind
+
 
 class _Model(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
@@ -22,7 +28,7 @@ class _Model(BaseModel):
 
 class Entity(_Model):
     text: str = Field(description="The matched substring, text[start:end].")
-    label: str = Field(description="The requested label this entity matched.")
+    kind: EntityKind = Field(description="The canonical kind this entity was classified as.")
     score: float = Field(ge=0.0, le=1.0)
     start: int = Field(ge=0, description="Character offset, inclusive.")
     end: int = Field(ge=0, description="Character offset, exclusive.")
@@ -30,9 +36,9 @@ class Entity(_Model):
 
 class NerRequest(_Model):
     text: str
-    labels: list[str] = Field(
+    kinds: list[EntityKind] = Field(
         min_length=1,
-        description="Zero-shot entity labels to extract (lower/title case).",
+        description="Entity kinds to extract. The service maps these to its model's labels.",
     )
     threshold: float = Field(
         default=0.5,
