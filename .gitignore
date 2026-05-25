@@ -39,14 +39,11 @@ htmlcov/
 models/
 
 # Documentation
-# Ignore docs/ except the committed, generated OpenAPI specs.
 docs/*
 !docs/openapi/
 docs/openapi/*
 !docs/openapi/*.json
-*.md
-!README.md
-!packages/*/README.md
+!docs/**/README.md
 
 # Environment files
 .env*

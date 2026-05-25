@@ -8,11 +8,13 @@ license = "Apache-2.0"
 authors = [{ name = "Nvisy" }]
 dependencies = [
     "bentoml>=1.4.39,<2",
+    "numpy>=1.26",
     "nvisy-core",
     # PaddlePaddle has no cp313 wheels yet, hence requires-python ==3.12.*.
     "paddleocr>=3.0,<4",
     "paddlepaddle>=3.0,<4",
     "pillow>=10",
+    "prometheus-client>=0.20",
 ]
 
 [build-system]

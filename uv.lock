@@ -969,6 +969,7 @@ dependencies = [
     { name = "bentoml" },
     { name = "gliner" },
     { name = "nvisy-core" },
+    { name = "prometheus-client" },
     { name = "torch" },
 ]
 
@@ -977,6 +978,7 @@ requires-dist = [
     { name = "bentoml", specifier = ">=1.4.39,<2" },
     { name = "gliner", specifier = ">=0.2.13" },
     { name = "nvisy-core", editable = "packages/nvisy-core" },
+    { name = "prometheus-client", specifier = ">=0.20" },
     { name = "torch", specifier = ">=2.2" },
 ]
 
@@ -1007,19 +1009,23 @@ version = "0.1.0"
 source = { editable = "packages/nvisy-paddle" }
 dependencies = [
     { name = "bentoml" },
+    { name = "numpy" },
     { name = "nvisy-core" },
     { name = "paddleocr" },
     { name = "paddlepaddle" },
     { name = "pillow" },
+    { name = "prometheus-client" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "bentoml", specifier = ">=1.4.39,<2" },
+    { name = "numpy", specifier = ">=1.26" },
     { name = "nvisy-core", editable = "packages/nvisy-core" },
     { name = "paddleocr", specifier = ">=3.0,<4" },
     { name = "paddlepaddle", specifier = ">=3.0,<4" },
     { name = "pillow", specifier = ">=10" },
+    { name = "prometheus-client", specifier = ">=0.20" },
 ]
 
 [[package]]
