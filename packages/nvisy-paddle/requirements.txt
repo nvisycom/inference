@@ -347,6 +347,7 @@ numpy==2.3.5 \
     --hash=sha256:f28620fe26bee16243be2b7b874da327312240a7cdc38b769a697578d2100013
     # via
     #   bentoml
+    #   nvisy-paddle
     #   opencv-contrib-python
     #   opt-einsum
     #   paddlepaddle
@@ -483,7 +484,9 @@ prettytable==3.17.0 \
 prometheus-client==0.25.0 \
     --hash=sha256:5e373b75c31afb3c86f1a52fa1ad470c9aace18082d39ec0d2f918d11cc9ba28 \
     --hash=sha256:d5aec89e349a6ec230805d0df882f3807f74fd6c1a2fa86864e3c2279059fed1
-    # via bentoml
+    # via
+    #   bentoml
+    #   nvisy-paddle
 propcache==0.5.2 \
     --hash=sha256:01c4fc7480cd0598bb4b57022df55b9ca296da7fc5a8760bd8451a7e63a7d427 \
     --hash=sha256:178b4a2cdaac1818e2bf1c5a99b94383fa73ea5382e032a48dec07dc5668dc42 \

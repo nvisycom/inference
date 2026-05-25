@@ -14,11 +14,15 @@ come from [`nvisy_core.ocr.v1`](../nvisy-core), and the generated contract lives
 at [`docs/openapi/ocr.json`](../../docs/openapi/ocr.json). Any service that
 speaks the same contract can replace it (bring-your-own-inference).
 
-Model weights load on startup. Mount custom PaddleOCR weights at `/models` to
-bring your own (see the repository [README](../../README.md) deploy example).
+BentoML batches concurrent calls, so the HTTP body wraps the list:
+`{"requests": [ { "image": "<base64>", "confidenceThreshold": 0.5 } ]}`; the
+response is a JSON array of `OcrResponse`.
 
-> **Status:** scaffold. The endpoint is wired to the v1 contract; PaddleOCR
-> inference is filled in by a follow-up.
+### Configuration
+
+- `NVISY_MODEL_PATH` — path to PaddleOCR weights. Defaults to `/models` when
+  that mount is non-empty, otherwise downloads the PP-OCRv5 English models.
+- `LOG_LEVEL` — logging level (default `INFO`).
 
 ```bash
 uv sync

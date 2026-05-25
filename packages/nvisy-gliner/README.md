@@ -8,18 +8,26 @@ endpoint, published as `ghcr.io/nvisy/inference-gliner`.
 ## Overview
 
 `NerService` exposes a single `POST /recognize` endpoint that takes text plus a
-set of zero-shot labels and returns matched entities — each with a label, score,
-and character offsets. It is the default implementation of the NER wire contract
-— request and response types come from [`nvisy_core.ner.v1`](../nvisy-core), and
+set of entity kinds and returns matched entities — each with a kind, score, and
+character offsets. It is the default implementation of the NER wire contract —
+request and response types come from [`nvisy_core.ner.v1`](../nvisy-core), and
 the generated contract lives at [`docs/openapi/ner.json`](../../docs/openapi/ner.json).
 Any service that speaks the same contract can replace it
 (bring-your-own-inference).
 
-Model weights load on startup. Mount custom GLiNER weights at `/models` to bring
-your own (see the repository [README](../../README.md) deploy example).
+The service maps requested kinds to GLiNER's labels (and back) via its
+[`label_map`](src/nvisy_gliner/label_map.py), so the model stays an
+implementation detail behind the taxonomy.
 
-> **Status:** scaffold. The endpoint is wired to the v1 contract; GLiNER
-> inference is filled in by a follow-up.
+BentoML batches concurrent calls, so the HTTP body wraps the list:
+`{"requests": [ { "text": ..., "kinds": ["person_name"], "threshold": 0.5 } ]}`;
+the response is a JSON array of `NerResponse`.
+
+### Configuration
+
+- `NVISY_MODEL_PATH` — path to GLiNER weights. Defaults to `/models` when that
+  mount is non-empty, otherwise downloads `urchade/gliner_multi-v2.1`.
+- `LOG_LEVEL` — logging level (default `INFO`).
 
 ```bash
 uv sync
