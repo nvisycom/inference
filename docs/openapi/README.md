@@ -3,7 +3,7 @@
 Machine-readable wire contracts for the inference services, **generated** from
 the BentoML services — do not edit by hand.
 
-- [`ocr.json`](ocr.json) — OCR contract (default impl: `nvisy-paddle`).
+- [`ocr.json`](ocr.json) — OCR contract (default impl: `nvisy-doctr`).
 - [`ner.json`](ner.json) — NER contract (default impl: `nvisy-gliner`).
 
 Regenerate after changing the `nvisy-core` types or a service signature:

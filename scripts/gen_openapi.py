@@ -19,8 +19,8 @@ import json
 import sys
 from pathlib import Path
 
+from nvisy_doctr.service import OcrService
 from nvisy_gliner.service import NerService
-from nvisy_paddle.service import OcrService
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "docs" / "openapi"
 SERVICES = {"ocr": OcrService, "ner": NerService}

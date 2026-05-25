@@ -43,7 +43,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [paddle, gliner]
+        service: [doctr, gliner]
 
     env:
       IMAGE: ghcr.io/nvisy/inference-${{ matrix.service }}

@@ -16,7 +16,7 @@ printf "[%s] [MAKE] [$(MAKECMDGOALS)] $(1)\n" "$$(date '+%Y-%m-%d %H:%M:%S')"
 endef
 
 # Services, keyed by package suffix (packages/nvisy-<suffix>).
-SERVICES := paddle gliner
+SERVICES := doctr gliner
 
 .PHONY: bento
 bento:  ## Install BentoML and all workspace dependencies into the venv.
@@ -60,10 +60,10 @@ check:  ## Fail if generated OpenAPI specs / requirements are stale (CI parity).
 	@uv run python scripts/gen_requirements.py --check
 	@$(call log,Generated artifacts up to date.)
 
-.PHONY: serve-paddle
-serve-paddle:  ## Serve the OCR (PaddleOCR) service locally with reload.
-	@$(call log,Serving nvisy-paddle...)
-	@uv run bentoml serve nvisy_paddle.service:OcrService --reload
+.PHONY: serve-doctr
+serve-doctr:  ## Serve the OCR (docTR) service locally with reload.
+	@$(call log,Serving nvisy-doctr...)
+	@uv run bentoml serve nvisy_doctr.service:OcrService --reload
 
 .PHONY: serve-gliner
 serve-gliner:  ## Serve the NER (GLiNER) service locally with reload.
