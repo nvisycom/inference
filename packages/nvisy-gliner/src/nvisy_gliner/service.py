@@ -19,8 +19,8 @@ from nvisy_gliner.label_map import DEFAULT_LABEL_MAP, LabelMap
 
 logger = get_logger("nvisy.gliner")
 
-# Default model id (NVISY_MODEL_NAME overrides; NVISY_MODEL_PATH / /models mount
-# overrides with on-disk weights). See nvisy_core.runtime.resolve_model.
+# Built-in default model id. Declared as the NVISY_MODEL_NAME env default below,
+# so it is the single source of truth and shows up in the bento manifest.
 DEFAULT_MODEL = "urchade/gliner_multi-v2.1"
 
 # prometheus_client directly (bentoml.metrics is deprecated in 1.4); BentoML
@@ -46,7 +46,13 @@ image = bentoml.images.Image(python_version="3.12", lock_python_packages=False).
     image=image,
     resources={"cpu": "2"},
     traffic={"timeout": 60},
-    envs=[{"name": "NVISY_MODEL_PATH"}, {"name": "NVISY_MODEL_NAME"}, {"name": "LOG_LEVEL"}],
+    # Declared with defaults so they're optional + documented in the bento
+    # manifest. NVISY_MODEL_PATH defaults to the /models mount (empty unless BYO
+    # weights are mounted); NVISY_MODEL_NAME is the model loaded otherwise.
+    envs=[
+        {"name": "NVISY_MODEL_PATH", "value": "/models"},
+        {"name": "NVISY_MODEL_NAME", "value": DEFAULT_MODEL},
+    ],
 )
 class NerService:
     def __init__(self) -> None:
@@ -55,7 +61,7 @@ class NerService:
         # Owns the translation between the canonical EntityKind taxonomy and
         # GLiNER's free-text labels — see nvisy_gliner.label_map.
         self.label_map: LabelMap = DEFAULT_LABEL_MAP
-        model = resolve_model(DEFAULT_MODEL)
+        model = resolve_model()
         logger.info("loading GLiNER (model=%s)", model)
         self.model = GLiNER.from_pretrained(model)
         logger.info("GLiNER ready")

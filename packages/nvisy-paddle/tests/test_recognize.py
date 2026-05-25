@@ -10,6 +10,7 @@ paddlepaddle or any weights. The model is replaced by a fake that returns canned
 from __future__ import annotations
 
 import base64
+import os
 import sys
 import types
 
@@ -43,6 +44,10 @@ def client():
     # ("Duplicated timeseries"). Clear the registry so this module's service
     # registers cleanly regardless of test order.
     _reset_prometheus_registry()
+
+    # resolve_model() needs NVISY_MODEL_NAME (served bentos inject it); the value
+    # is irrelevant here since PaddleOCR is faked.
+    os.environ["NVISY_MODEL_NAME"] = "fake-version"
 
     # Fake the heavy module imported inside OcrService.__init__.
     paddleocr = types.ModuleType("paddleocr")

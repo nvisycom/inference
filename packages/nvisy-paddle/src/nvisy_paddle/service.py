@@ -27,8 +27,8 @@ if TYPE_CHECKING:
 
 logger = get_logger("nvisy.paddle")
 
-# Default OCR version (NVISY_MODEL_NAME overrides; NVISY_MODEL_PATH / /models
-# mount overrides with on-disk weights). See nvisy_core.runtime.resolve_model.
+# Built-in default OCR version. Declared as the NVISY_MODEL_NAME env default
+# below, so it's the single source of truth and shows up in the bento manifest.
 DEFAULT_MODEL = "PP-OCRv5"
 
 # Effective batch size, to see whether adaptive batching actually fills.
@@ -60,25 +60,30 @@ image = (
     resources={"cpu": "2"},
     # ADR default; profile and tune later.
     traffic={"timeout": 60},
+    # Declared with defaults so they're optional + documented in the bento
+    # manifest. NVISY_MODEL_PATH defaults to the /models mount (empty unless BYO
+    # weights are mounted); NVISY_MODEL_NAME is the OCR version loaded otherwise;
+    # NVISY_OCR_LANG="auto" means PaddleOCR's general model (lang unset).
     envs=[
-        {"name": "NVISY_MODEL_PATH"},
-        {"name": "NVISY_MODEL_NAME"},
-        {"name": "NVISY_OCR_LANG"},
-        {"name": "LOG_LEVEL"},
+        {"name": "NVISY_MODEL_PATH", "value": "/models"},
+        {"name": "NVISY_MODEL_NAME", "value": DEFAULT_MODEL},
+        {"name": "NVISY_OCR_LANG", "value": "auto"},
     ],
 )
 class OcrService:
     def __init__(self) -> None:
         from paddleocr import PaddleOCR
 
-        model = resolve_model(DEFAULT_MODEL)
+        model = resolve_model()
         # PP-OCRv5 is multilingual (106 languages). lang selects the recognition
-        # model at init (one per process); unset uses PaddleOCR's default model,
-        # which covers Simplified/Traditional Chinese, Pinyin, English and
-        # Japanese. NVISY_OCR_LANG picks a specific language model (e.g.
-        # "korean", "fr", "cyrillic").
+        # model at init (one per process). NVISY_OCR_LANG="auto" (the default)
+        # means pass no lang, i.e. PaddleOCR's general model covering
+        # Simplified/Traditional Chinese, Pinyin, English and Japanese; any other
+        # value (e.g. "korean", "fr", "cyrillic") selects that language model.
         lang = os.getenv("NVISY_OCR_LANG")
-        logger.info("loading PaddleOCR (model=%s, lang=%s)", model, lang or "<default>")
+        if lang == "auto":
+            lang = None
+        logger.info("loading PaddleOCR (model=%s, lang=%s)", model, lang or "<general>")
         # Detection + recognition only — no doc orientation / unwarping (the
         # runtime handles page geometry upstream). A resolved value that is an
         # existing directory is a mounted/BYO weights dir; otherwise it's an OCR

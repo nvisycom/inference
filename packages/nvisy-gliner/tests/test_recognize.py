@@ -8,6 +8,7 @@ replaced by a fake returning GLiNER-shaped spans.
 
 from __future__ import annotations
 
+import os
 import sys
 import types
 
@@ -36,6 +37,10 @@ def client():
     # its default metrics cleanly even when another service ran first in the
     # same process ("Duplicated timeseries").
     _reset_prometheus_registry()
+
+    # resolve_model() needs NVISY_MODEL_NAME (served bentos inject it); the value
+    # is irrelevant here since GLiNER is faked.
+    os.environ["NVISY_MODEL_NAME"] = "fake/model"
 
     gliner = types.ModuleType("gliner")
     gliner.GLiNER = _FakeGLiNER

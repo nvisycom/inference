@@ -11,37 +11,36 @@ import logging
 import os
 from pathlib import Path
 
-# Where mounted/BYO weights are expected (see the README docker-compose).
-DEFAULT_MODEL_DIR = "/models"
-# Filesystem path to pre-fetched/mounted weights. Takes precedence over the name.
+# Filesystem path to weights; defaults to the conventional /models mount.
 MODEL_PATH_ENV = "NVISY_MODEL_PATH"
-# Model identifier to load/download (e.g. a Hugging Face repo id, or a
-# framework-specific name like an OCR version) when no path is given.
+# Model identifier (Hugging Face repo id, or a framework name like an OCR
+# version) loaded when no weights are present at the path above.
 MODEL_NAME_ENV = "NVISY_MODEL_NAME"
 # Header the Rust runtime sends to correlate a request across services.
 REQUEST_ID_HEADER = "x-request-id"
 
 
-def resolve_model(default_name: str) -> str:
+def resolve_model() -> str:
     """Resolve which model a service should load (bring-your-own-weights).
 
-    Precedence:
-
-    1. ``$NVISY_MODEL_PATH`` — a filesystem path to weights, if set.
-    2. ``/models`` — when mounted and non-empty (the conventional BYO mount).
-    3. ``$NVISY_MODEL_NAME`` — a model identifier to load/download.
-    4. ``default_name`` — the service's built-in default identifier.
-
-    Returns either a local path (cases 1-2) or a model identifier (cases 3-4);
-    both PaddleOCR and ``GLiNER.from_pretrained`` accept either form.
+    If ``$NVISY_MODEL_PATH`` points at a directory that contains weights, load
+    those (mounted/BYO weights); otherwise load ``$NVISY_MODEL_NAME``. Both envs
+    are declared on the service with default ``value``s (``/models`` and the
+    service's default model id), so BentoML always injects them — the path
+    defaulting to an empty ``/models`` mount means "no BYO weights, use the
+    named model". Returns a local path or a model identifier; both PaddleOCR and
+    ``GLiNER.from_pretrained`` accept either form.
     """
     path = os.getenv(MODEL_PATH_ENV)
     if path:
-        return path
-    mounted = Path(DEFAULT_MODEL_DIR)
-    if mounted.is_dir() and any(mounted.iterdir()):
-        return str(mounted)
-    return os.getenv(MODEL_NAME_ENV) or default_name
+        weights = Path(path)
+        if weights.is_dir() and any(weights.iterdir()):
+            return path
+    name = os.getenv(MODEL_NAME_ENV)
+    if not name:
+        # Served bentos inject NVISY_MODEL_NAME; guard direct/test invocation.
+        raise RuntimeError(f"{MODEL_NAME_ENV} is not set and no weights at {MODEL_PATH_ENV}")
+    return name
 
 
 def get_logger(name: str) -> logging.Logger:
