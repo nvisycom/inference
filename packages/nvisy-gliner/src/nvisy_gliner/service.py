@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import bentoml
 from bentoml.exceptions import ServiceUnavailable
+from nvisy_core.entity import EntityKind
 from nvisy_core.ner.v1 import Entity, NerRequest, NerResponse
 from nvisy_core.runtime import get_logger, request_id, resolve_model
 from prometheus_client import Histogram
@@ -61,9 +62,9 @@ class NerService:
         # Owns the translation between the canonical EntityKind taxonomy and
         # GLiNER's free-text labels — see nvisy_gliner.label_map.
         self.label_map: LabelMap = DEFAULT_LABEL_MAP
-        model = resolve_model()
-        logger.info("loading GLiNER (model=%s)", model)
-        self.model = GLiNER.from_pretrained(model)
+        self.model_id = resolve_model()
+        logger.info("loading GLiNER (model=%s)", self.model_id)
+        self.model = GLiNER.from_pretrained(self.model_id)
         logger.info("GLiNER ready")
 
     @bentoml.api(batchable=True, max_batch_size=16, max_latency_ms=80)
@@ -82,8 +83,13 @@ class NerService:
         labels = self.label_map.labels_for(req.kinds)
         if not labels:
             # None of the requested kinds map to a model label.
-            return NerResponse(entities=[])
-        spans = self.model.predict_entities(req.text, labels, threshold=req.threshold)
+            return NerResponse(entities=[], model_id=self.model_id)
+        spans = self.model.predict_entities(
+            req.text,
+            labels,
+            threshold=req.threshold,
+            return_class_probs=req.return_class_probs,
+        )
         entities: list[Entity] = []
         for span in spans:
             kind = self.label_map.classify(span["label"])
@@ -96,6 +102,18 @@ class NerService:
                     score=float(span["score"]),
                     start=int(span["start"]),
                     end=int(span["end"]),
+                    class_probs=self._map_class_probs(span.get("class_probs")),
                 )
             )
-        return NerResponse(entities=entities)
+        return NerResponse(entities=entities, model_id=self.model_id)
+
+    def _map_class_probs(self, probs: object) -> dict[EntityKind, float] | None:
+        """Map GLiNER's label->prob dict onto EntityKind, dropping unmapped labels."""
+        if not isinstance(probs, dict):
+            return None
+        mapped: dict[EntityKind, float] = {}
+        for label, prob in probs.items():
+            kind = self.label_map.classify(label)
+            if kind is not None:
+                mapped[kind] = float(prob)
+        return mapped or None

@@ -18,12 +18,21 @@ def test_entity_carries_kind_and_offsets():
     assert ent.kind.category == EntityCategory.PERSONAL_IDENTITY
 
 
-def test_response_serializes_kind_as_snake_case():
+def test_entity_rejects_non_positive_span():
+    import pytest
+
+    with pytest.raises(ValueError, match="end must be greater than start"):
+        Entity(text="", kind=EntityKind.PERSON_NAME, score=0.9, start=3, end=3)
+
+
+def test_response_serializes_kind_and_model_id():
     resp = NerResponse(
-        entities=[Entity(text="Ada", kind=EntityKind.PERSON_NAME, score=0.9, start=0, end=3)]
+        entities=[Entity(text="Ada", kind=EntityKind.PERSON_NAME, score=0.9, start=0, end=3)],
+        model_id="org/some-model",
     )
     dumped = resp.model_dump(by_alias=True, mode="json")
     assert dumped["entities"][0]["kind"] == "person_name"
+    assert dumped["modelId"] == "org/some-model"
 
 
 def test_label_map_round_trips():

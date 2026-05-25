@@ -20,7 +20,13 @@ Point = tuple[float, float]
 
 
 class _Model(BaseModel):
-    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
+    # camelCase on the wire: aliases on input (populate_by_name accepts either)
+    # AND on output (serialize_by_alias) so responses match the OpenAPI schema.
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+        serialize_by_alias=True,
+    )
 
 
 class BoundingBox(_Model):
