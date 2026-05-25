@@ -4,84 +4,31 @@
 
 Externalized model inference for the [Nvisy runtime](https://github.com/nvisycom/runtime).
 
-Hosts each model as a standalone HTTP/JSON service so the runtime calls
-inference over the network instead of loading ML runtimes in-process. See the
-ADR: [nvisycom/runtime#194](https://github.com/nvisycom/runtime/issues/194).
+Hosts each model as a standalone HTTP service so the runtime calls inference
+over the network instead of loading ML runtimes in-process. Each model category
+ships as its own independently scalable, independently deployable service behind
+a stable wire contract.
 
-## Overview
+## Features
 
-Two [BentoML](https://bentoml.com) services, packaged as independent images.
-They are the **default** implementations of the OCR and NER wire contracts —
-named after the engine they wrap, since the contract (not the engine) is what
-the runtime depends on:
+- **Contract-first, swappable engines**: services implement a versioned wire contract, not a specific model — the engine behind each contract can be replaced without touching the runtime
+- **Model categories**: detection OCR (text + word-level geometry), vision-language OCR (high-accuracy transcription and layout), and named-entity recognition over a shared entity taxonomy
+- **Layered OCR**: traditional OCR provides precise geometry while an optional GPU vision-language service refines text accuracy; the runtime reconciles the two
+- **Independent services**: each model runs as its own image with independent scaling and failure domains, and any service can be opted out of
+- **Bring your own inference**: any service that reproduces the wire contract is a drop-in replacement, including self-hosted or custom models and weights
+- **Lockstep versioning**: inference releases track the runtime version so the contract stays in sync
 
-- **`nvisy-doctr`** ([`packages/nvisy-doctr`](packages/nvisy-doctr)) —
-  docTR (OCR contract), published as `ghcr.io/nvisy/inference-doctr`.
-- **`nvisy-gliner`** ([`packages/nvisy-gliner`](packages/nvisy-gliner)) —
-  GLiNER (NER contract), published as `ghcr.io/nvisy/inference-gliner`.
+## Quick Start
 
-Plus an **optional GPU** verification service:
+The fastest way to get started is with [Nvisy Cloud](https://nvisy.com).
 
-- **`nvisy-paddle`** ([`packages/nvisy-paddle`](packages/nvisy-paddle)) —
-  PaddleOCR-VL, a vision-language model that re-reads images for higher text
-  accuracy, published as `ghcr.io/nvisy/inference-paddle`. The runtime
-  reconciles its text with the OCR geometry; deployments without a GPU simply
-  don't run it. See [`docs/design/ocrvlm.md`](docs/design/ocrvlm.md).
-
-Separate containers: independent scaling, independent failure domains, and
-customers can opt out of any.
-
-**The data model is ours; the transport is idiomatic BentoML.** The pydantic
-types in [`nvisy-core`](packages/nvisy-core) define the request/response
-payloads — `OcrRequest`/`OcrResponse`, `NerRequest`/`NerResponse`, and the
-`EntityKind` taxonomy — and those are what a bring-your-own-inference service
-must implement. BentoML serves them over plain HTTP/JSON; the outer envelope is
-BentoML's standard format (a batchable endpoint takes a list, so the body is
-`{"requests": [...]}` and the response is a JSON array; validation errors use
-BentoML's error shape). The exact, machine-readable contract — payloads and
-envelope — is the OpenAPI generated from the services into
-[`docs/openapi/`](docs/openapi); reproduce that and the Rust runtime can't tell
-the difference. The runtime (`nvisy-inference-client`) is the source of truth;
-versioning is lockstep — runtime `vX.Y.Z` expects inference `vX.Y.Z`.
-
-The repository is a single [uv](https://docs.astral.sh/uv/) workspace: all
-packages share one lockfile and resolve `nvisy-core` locally, while each service
-still ships only its own dependency subtree. Python is pinned to 3.12
-(PaddlePaddle has no 3.13 wheels yet).
-
-Images are built by BentoML itself (`bentoml build` + `containerize`) from the
-`Image` config in each `service.py` — there are no hand-written Dockerfiles. The
-per-service `requirements.txt` is exported from the workspace lock
-(`scripts/gen_requirements.py`).
-
-Common tasks are wrapped in the [`Makefile`](Makefile) (`make help` to list):
-
-```bash
-make bento            # install BentoML + workspace deps
-make serve-doctr      # serve the OCR service locally (or serve-gliner)
-make build            # build both Bentos
-make containerize     # build + containerize into local Docker images
-make generate         # regenerate OpenAPI specs + per-service requirements
-make ci               # lint + drift checks + tests
-```
-
-## Deploy
-
-```yaml
-services:
-  inference-doctr:
-    image: ghcr.io/nvisy/inference-doctr:1.0
-    volumes:
-      - ./my-doctr-weights:/models   # optional: BYO weights
-  inference-gliner:
-    image: ghcr.io/nvisy/inference-gliner:1.0
-    volumes:
-      - ./my-gliner-weights:/models      # optional: BYO weights
-```
+For self-hosted deployments, the services are published as container images and
+run alongside the [Nvisy runtime](https://github.com/nvisycom/runtime); see
+[`docs/`](docs/) for the wire contract and deployment guidance.
 
 ## Documentation
 
-See [`docs/`](docs/) for the generated OpenAPI specs and contract documentation.
+See [`docs/`](docs/) for architecture, contract, and API documentation.
 
 ## Changelog
 
