@@ -1,21 +1,21 @@
 """OCR inference service (PaddleOCR PP-OCRv5) exposed over HTTP via BentoML.
 
-Scaffold stub — PaddleOCR wiring is filled in by a follow-up. Request/response
-types come from ``nvisy_core.ocr`` (the shared wire contract).
+The default implementation of the OCR wire contract (``nvisy_core.ocr.v1``).
+Scaffold stub — PaddleOCR wiring is filled in by a follow-up.
 
 Run locally::
 
-    uv run bentoml serve nvisy_ocr.service:OcrService --reload
+    uv run bentoml serve nvisy_paddle.service:OcrService --reload
 """
 
 from __future__ import annotations
 
 import bentoml
-from nvisy_core.ocr import OcrRequest, OcrResponse
+from nvisy_core.ocr.v1 import OcrRequest, OcrResponse
 
 
 @bentoml.service(
-    name="nvisy-inference-ocr",
+    name="nvisy-inference-paddle",
     resources={"cpu": "2"},
     # ADR default; profile and tune later.
     traffic={"timeout": 60},
