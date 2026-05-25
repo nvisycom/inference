@@ -16,6 +16,8 @@ override it (e.g. for BYO weights trained on different labels).
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping
+
 from nvisy_core.entity import EntityKind
 
 # kind -> the GLiNER label string we ask the model for. GLiNER is zero-shot, so
@@ -99,22 +101,32 @@ DEFAULT_KIND_TO_LABEL: dict[EntityKind, str] = {
 
 
 class LabelMap:
-    """Bidirectional map between GLiNER labels and entity kinds."""
+    """Bidirectional map between GLiNER labels and entity kinds.
 
-    def __init__(self, kind_to_label: dict[EntityKind, str] | None = None) -> None:
-        self._kind_to_label = dict(kind_to_label or DEFAULT_KIND_TO_LABEL)
-        # Reverse lookup for classifying model output. If two kinds shared a
-        # label the last one would win; the default map is 1:1.
-        self._label_to_kind = {label: kind for kind, label in self._kind_to_label.items()}
+    The mapping must be injective (each label maps to exactly one kind) so the
+    reverse lookup used by :meth:`classify` is unambiguous; this is enforced at
+    construction.
+    """
 
-    def labels_for(self, kinds: list[EntityKind]) -> list[str]:
-        """The GLiNER labels to request for the given kinds (unmapped skipped)."""
-        seen: dict[str, None] = {}
-        for kind in kinds:
-            label = self._kind_to_label.get(kind)
-            if label is not None:
-                seen.setdefault(label, None)
-        return list(seen)
+    def __init__(self, kind_to_label: Mapping[EntityKind, str] | None = None) -> None:
+        self._kind_to_label: dict[EntityKind, str] = dict(kind_to_label or DEFAULT_KIND_TO_LABEL)
+        reverse: dict[str, EntityKind] = {}
+        for kind, label in self._kind_to_label.items():
+            if label in reverse:
+                raise ValueError(
+                    f"label {label!r} maps to both {reverse[label]} and {kind}; "
+                    "the label map must be injective"
+                )
+            reverse[label] = kind
+        self._label_to_kind = reverse
+
+    def labels_for(self, kinds: Iterable[EntityKind]) -> list[str]:
+        """The GLiNER labels to request for ``kinds``, de-duplicated, order-stable.
+
+        Kinds with no mapping (e.g. visual/biometric) are skipped.
+        """
+        labels = (self._kind_to_label[k] for k in kinds if k in self._kind_to_label)
+        return list(dict.fromkeys(labels))
 
     def classify(self, label: str) -> EntityKind | None:
         """The kind for a GLiNER span label, or ``None`` if unmapped (dropped)."""

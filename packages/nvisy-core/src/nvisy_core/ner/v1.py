@@ -18,10 +18,15 @@ models mirror it. The wire is camelCase to match the runtime's serde
 
 from __future__ import annotations
 
+from typing import Annotated
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
 from nvisy_core.entity import EntityKind
+
+# A probability/score in the closed unit interval.
+Probability = Annotated[float, Field(ge=0.0, le=1.0)]
 
 
 class _Model(BaseModel):
@@ -39,10 +44,10 @@ class _Model(BaseModel):
 class Entity(_Model):
     text: str = Field(description="The matched substring, text[start:end].")
     kind: EntityKind = Field(description="The canonical kind this entity was classified as.")
-    score: float = Field(ge=0.0, le=1.0)
+    score: Probability
     start: int = Field(ge=0, description="Character offset, inclusive.")
     end: int = Field(ge=0, description="Character offset, exclusive.")
-    class_probs: dict[EntityKind, float] | None = Field(
+    class_probs: dict[EntityKind, Probability] | None = Field(
         default=None,
         description="Per-kind probability distribution for this span, mapped from "
         "the model's labels. Present only when the request set "
@@ -62,10 +67,8 @@ class NerRequest(_Model):
         min_length=1,
         description="Entity kinds to extract. The service maps these to its model's labels.",
     )
-    threshold: float = Field(
+    threshold: Probability = Field(
         default=0.5,
-        ge=0.0,
-        le=1.0,
         description="Minimum score for an entity to be returned.",
     )
     return_class_probs: bool = Field(

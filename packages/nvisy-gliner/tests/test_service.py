@@ -1,9 +1,10 @@
 """Smoke tests for the NER service scaffold."""
 
 import bentoml
+import pytest
 from nvisy_core.entity import EntityCategory, EntityKind
 from nvisy_core.ner.v1 import Entity, NerRequest, NerResponse
-from nvisy_gliner.label_map import DEFAULT_KIND_TO_LABEL, DEFAULT_LABEL_MAP
+from nvisy_gliner.label_map import DEFAULT_KIND_TO_LABEL, DEFAULT_LABEL_MAP, LabelMap
 from nvisy_gliner.service import NerService
 
 
@@ -71,6 +72,19 @@ def test_label_map_omits_non_text_kinds():
 def test_label_map_labels_are_unique():
     labels = list(DEFAULT_KIND_TO_LABEL.values())
     assert len(labels) == len(set(labels)), "label strings must be 1:1 for reverse mapping"
+
+
+def test_label_map_rejects_non_injective_mapping():
+    with pytest.raises(ValueError, match="must be injective"):
+        LabelMap({EntityKind.PERSON_NAME: "x", EntityKind.USERNAME: "x"})
+
+
+def test_labels_for_dedupes_and_skips_unmapped():
+    # FACE has no mapping (visual); PERSON_NAME requested twice dedupes.
+    labels = DEFAULT_LABEL_MAP.labels_for(
+        [EntityKind.PERSON_NAME, EntityKind.FACE, EntityKind.PERSON_NAME]
+    )
+    assert labels == ["person"]
 
 
 def test_service_exposes_recognize_endpoint():
