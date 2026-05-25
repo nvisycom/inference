@@ -23,13 +23,18 @@ the runtime depends on:
 Two containers, not one: independent scaling, independent failure domains, and
 customers can opt out of either.
 
-The HTTP/JSON wire contract is **our shape, not BentoML's**. The pydantic types
-in [`nvisy-core`](packages/nvisy-core) are the contract; BentoML is just the
-reference implementation. Anything that speaks the contract can be dropped in
-(bring-your-own-inference). Machine-readable OpenAPI specs are generated from
-the services into [`docs/openapi/`](docs/openapi). The Rust runtime
-(`nvisy-inference-client`) is the source of truth; versioning is lockstep —
-runtime `vX.Y.Z` expects inference `vX.Y.Z`.
+**The data model is ours; the transport is idiomatic BentoML.** The pydantic
+types in [`nvisy-core`](packages/nvisy-core) define the request/response
+payloads — `OcrRequest`/`OcrResponse`, `NerRequest`/`NerResponse`, and the
+`EntityKind` taxonomy — and those are what a bring-your-own-inference service
+must implement. BentoML serves them over plain HTTP/JSON; the outer envelope is
+BentoML's standard format (a batchable endpoint takes a list, so the body is
+`{"requests": [...]}` and the response is a JSON array; validation errors use
+BentoML's error shape). The exact, machine-readable contract — payloads and
+envelope — is the OpenAPI generated from the services into
+[`docs/openapi/`](docs/openapi); reproduce that and the Rust runtime can't tell
+the difference. The runtime (`nvisy-inference-client`) is the source of truth;
+versioning is lockstep — runtime `vX.Y.Z` expects inference `vX.Y.Z`.
 
 The repository is a single [uv](https://docs.astral.sh/uv/) workspace: all
 packages share one lockfile and resolve `nvisy-core` locally, while each service
