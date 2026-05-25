@@ -3,6 +3,27 @@
     "schemas": {
       "Entity": {
         "properties": {
+          "classProbs": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maximum": 1.0,
+                  "minimum": 0.0,
+                  "type": "number"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/EntityKind"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Per-kind probability distribution for this span, mapped from the model's labels. Present only when the request set returnClassProbs; kinds outside the request are omitted.",
+            "title": "Classprobs"
+          },
           "end": {
             "description": "Character offset, exclusive.",
             "minimum": 0,
@@ -160,18 +181,11 @@
             "title": "Kinds",
             "type": "array"
           },
-          "language": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "BCP-47 language hint (advisory).",
-            "title": "Language"
+          "returnClassProbs": {
+            "default": false,
+            "description": "Include the per-kind probability distribution on each entity.",
+            "title": "Returnclassprobs",
+            "type": "boolean"
           },
           "text": {
             "title": "Text",
@@ -201,8 +215,16 @@
             },
             "title": "Entities",
             "type": "array"
+          },
+          "modelId": {
+            "description": "Identifier of the model that produced these entities (e.g. the loaded GLiNER repo id). Lets the runtime attribute recognition provenance without hardcoding it.",
+            "title": "Modelid",
+            "type": "string"
           }
         },
+        "required": [
+          "modelId"
+        ],
         "title": "NerResponse",
         "type": "object"
       },

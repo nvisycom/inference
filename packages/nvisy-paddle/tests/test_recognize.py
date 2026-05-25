@@ -84,8 +84,11 @@ def test_recognize_maps_words_and_filters_by_confidence(client):
         json={"requests": [{"image": _png_b64(), "confidenceThreshold": 0.5}]},
     )
     assert resp.status_code == 200
-    pages = resp.json()[0]["pages"]
-    words = pages[0]["blocks"][0]["lines"][0]["words"]
+    page = resp.json()[0]["pages"][0]
+    # Response serializes camelCase, matching the OpenAPI schema (regression
+    # guard: this field was emitted as snake_case page_number before).
+    assert "pageNumber" in page and "page_number" not in page
+    words = page["blocks"][0]["lines"][0]["words"]
     # "Lovelace" (0.40) is below the 0.5 threshold and dropped; "Ada" stays.
     assert [w["text"] for w in words] == ["Ada"]
     assert words[0]["bbox"] == {"x": 0, "y": 0, "width": 30, "height": 10}

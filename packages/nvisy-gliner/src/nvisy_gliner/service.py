@@ -10,7 +10,8 @@ Run locally::
 from __future__ import annotations
 
 import bentoml
-from bentoml.exceptions import ServiceUnavailable
+from bentoml.exceptions import InternalServerError
+from nvisy_core.entity import EntityKind
 from nvisy_core.ner.v1 import Entity, NerRequest, NerResponse
 from nvisy_core.runtime import get_logger, request_id, resolve_model
 from prometheus_client import Histogram
@@ -61,33 +62,49 @@ class NerService:
         # Owns the translation between the canonical EntityKind taxonomy and
         # GLiNER's free-text labels — see nvisy_gliner.label_map.
         self.label_map: LabelMap = DEFAULT_LABEL_MAP
-        model = resolve_model()
-        logger.info("loading GLiNER (model=%s)", model)
-        self.model = GLiNER.from_pretrained(model)
+        self.model_id = resolve_model()
+        logger.info("loading GLiNER (model=%s)", self.model_id)
+        self.model = GLiNER.from_pretrained(self.model_id)
         logger.info("GLiNER ready")
 
+    # Sync (not async): inference is CPU/GPU-bound and blocking. BentoML runs
+    # sync endpoints in a managed thread pool, so this never blocks the event
+    # loop (an async def here would, and could starve /readyz).
     @bentoml.api(batchable=True, max_batch_size=16, max_latency_ms=80)
-    async def recognize(
+    def recognize(
         self,
         requests: list[NerRequest],
         ctx: bentoml.Context,
     ) -> list[NerResponse]:
-        if self.model is None:  # pragma: no cover - defensive; __init__ loads eagerly
-            raise ServiceUnavailable("NER model is not loaded")
         batch_size_metric.observe(len(requests))
-        logger.info("recognize batch=%d req_id=%s", len(requests), request_id(ctx))
-        return [self._recognize_one(req) for req in requests]
+        rid = request_id(ctx)
+        logger.info("recognize batch=%d req_id=%s", len(requests), rid)
+        try:
+            return [self._recognize_one(req) for req in requests]
+        except Exception as exc:
+            # Surface inference failures as a clean 500 rather than a raw stack
+            # trace; the error is visible, not silently swallowed.
+            logger.exception("inference failed (req_id=%s)", rid)
+            raise InternalServerError("NER inference failed") from exc
 
     def _recognize_one(self, req: NerRequest) -> NerResponse:
         labels = self.label_map.labels_for(req.kinds)
         if not labels:
-            # None of the requested kinds map to a model label.
-            return NerResponse(entities=[])
-        spans = self.model.predict_entities(req.text, labels, threshold=req.threshold)
+            # None of the requested kinds map to a model label (e.g. all
+            # visual/biometric); nothing for a text model to find.
+            return NerResponse(entities=[], model_id=self.model_id)
+        spans = self.model.predict_entities(
+            req.text,
+            labels,
+            threshold=req.threshold,
+            return_class_probs=req.return_class_probs,
+        )
         entities: list[Entity] = []
         for span in spans:
+            # We only request mapped labels, so classify() normally succeeds;
+            # guard anyway in case the model echoes an unexpected label.
             kind = self.label_map.classify(span["label"])
-            if kind is None:  # label not in our taxonomy — drop it
+            if kind is None:
                 continue
             entities.append(
                 Entity(
@@ -96,6 +113,18 @@ class NerService:
                     score=float(span["score"]),
                     start=int(span["start"]),
                     end=int(span["end"]),
+                    class_probs=self._map_class_probs(span.get("class_probs")),
                 )
             )
-        return NerResponse(entities=entities)
+        return NerResponse(entities=entities, model_id=self.model_id)
+
+    def _map_class_probs(self, probs: object) -> dict[EntityKind, float] | None:
+        """Map GLiNER's label->prob dict onto EntityKind, dropping unmapped labels."""
+        if not isinstance(probs, dict):
+            return None
+        mapped: dict[EntityKind, float] = {}
+        for label, prob in probs.items():
+            kind = self.label_map.classify(label)
+            if kind is not None:
+                mapped[kind] = float(prob)
+        return mapped or None
