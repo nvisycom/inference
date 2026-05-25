@@ -17,7 +17,7 @@ import os.path
 from typing import TYPE_CHECKING
 
 import bentoml
-from bentoml.exceptions import InvalidArgument, ServiceUnavailable
+from bentoml.exceptions import BentoMLException, InternalServerError, InvalidArgument
 from nvisy_core.ocr.v1 import Block, BoundingBox, Line, OcrRequest, OcrResponse, Page, Word
 from nvisy_core.runtime import get_logger, request_id, resolve_model
 from prometheus_client import Histogram
@@ -104,17 +104,29 @@ class OcrService:
             self.ocr = PaddleOCR(ocr_version=model, **common)
         logger.info("PaddleOCR ready")
 
+    # Sync (not async): inference is CPU/GPU-bound and blocking. BentoML runs
+    # sync endpoints in a managed thread pool, so this never blocks the event
+    # loop (an async def here would, and could starve /readyz).
     @bentoml.api(batchable=True, max_batch_size=8, max_latency_ms=120)
-    async def recognize(
+    def recognize(
         self,
         requests: list[OcrRequest],
         ctx: bentoml.Context,
     ) -> list[OcrResponse]:
-        if self.ocr is None:  # pragma: no cover - defensive; __init__ loads eagerly
-            raise ServiceUnavailable("OCR model is not loaded")
         batch_size_metric.observe(len(requests))
-        logger.info("recognize batch=%d req_id=%s", len(requests), request_id(ctx))
-        return [self._recognize_one(req) for req in requests]
+        rid = request_id(ctx)
+        logger.info("recognize batch=%d req_id=%s", len(requests), rid)
+        try:
+            return [self._recognize_one(req) for req in requests]
+        except BentoMLException:
+            # Typed request errors (e.g. InvalidArgument for bad image bytes)
+            # carry their own status; let them through unchanged.
+            raise
+        except Exception as exc:
+            # Surface inference failures as a clean 500 rather than a raw stack
+            # trace; the error is visible, not silently swallowed.
+            logger.exception("inference failed (req_id=%s)", rid)
+            raise InternalServerError("OCR inference failed") from exc
 
     def _recognize_one(self, req: OcrRequest) -> OcrResponse:
         image = _decode_image(req.image)
