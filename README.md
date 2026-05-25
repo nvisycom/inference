@@ -20,8 +20,16 @@ the runtime depends on:
 - **`nvisy-gliner`** ([`packages/nvisy-gliner`](packages/nvisy-gliner)) —
   GLiNER (NER contract), published as `ghcr.io/nvisy/inference-gliner`.
 
-Two containers, not one: independent scaling, independent failure domains, and
-customers can opt out of either.
+Plus an **optional GPU** verification service:
+
+- **`nvisy-paddle`** ([`packages/nvisy-paddle`](packages/nvisy-paddle)) —
+  PaddleOCR-VL, a vision-language model that re-reads images for higher text
+  accuracy, published as `ghcr.io/nvisy/inference-paddle`. The runtime
+  reconciles its text with the OCR geometry; deployments without a GPU simply
+  don't run it. See [`docs/design/ocrvlm.md`](docs/design/ocrvlm.md).
+
+Separate containers: independent scaling, independent failure domains, and
+customers can opt out of any.
 
 **The data model is ours; the transport is idiomatic BentoML.** The pydantic
 types in [`nvisy-core`](packages/nvisy-core) define the request/response

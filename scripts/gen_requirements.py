@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SERVICES = {
     "nvisy-doctr": ROOT / "packages" / "nvisy-doctr" / "requirements.txt",
     "nvisy-gliner": ROOT / "packages" / "nvisy-gliner" / "requirements.txt",
+    "nvisy-paddle": ROOT / "packages" / "nvisy-paddle" / "requirements.txt",
 }
 
 

@@ -11,8 +11,8 @@ dependencies = [
     "nvisy-core",
     "pillow>=10",
     "prometheus-client>=0.20",
-    # docTR with the PyTorch backend; provides detection + recognition models.
-    "python-doctr[torch]>=1.0,<2",
+    # docTR (PyTorch backend); torch/torchvision are core deps in 1.x, no extra.
+    "python-doctr>=1.0,<2",
 ]
 
 [build-system]
