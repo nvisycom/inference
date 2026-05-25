@@ -3,8 +3,8 @@
 [![Build](https://img.shields.io/github/actions/workflow/status/nvisycom/inference/build.yml?branch=main&label=build%20%26%20test&style=flat-square)](https://github.com/nvisycom/inference/actions/workflows/build.yml)
 
 Vision-language OCR verification service for nvisy. Wraps
-[PaddleOCR-VL](https://www.paddleocr.ai/) behind an HTTP/JSON endpoint, published
-as `ghcr.io/nvisy/inference-paddle`.
+[PaddleOCR-VL](https://github.com/PaddlePaddle/PaddleOCR) behind an HTTP/JSON
+endpoint, published as `ghcr.io/nvisy/inference-paddle`.
 
 ## Overview
 
