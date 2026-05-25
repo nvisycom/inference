@@ -36,11 +36,20 @@ packages share one lockfile and resolve `nvisy-core` locally, while each service
 still ships only its own dependency subtree. Python is pinned to 3.12
 (PaddlePaddle has no 3.13 wheels yet).
 
+Images are built by BentoML itself (`bentoml build` + `containerize`) from the
+`Image` config in each `service.py` — there are no hand-written Dockerfiles. The
+per-service `requirements.txt` is exported from the workspace lock
+(`scripts/gen_requirements.py`).
+
+Common tasks are wrapped in the [`Makefile`](Makefile) (`make help` to list):
+
 ```bash
-uv sync                                                  # whole workspace
-uv run bentoml serve nvisy_paddle.service:OcrService --reload
-uv run bentoml serve nvisy_gliner.service:NerService --reload
-uv run python scripts/gen_openapi.py                     # regenerate OpenAPI specs
+make bento            # install BentoML + workspace deps
+make serve-paddle     # serve the OCR service locally (or serve-gliner)
+make build            # build both Bentos
+make containerize     # build + containerize into local Docker images
+make generate         # regenerate OpenAPI specs + per-service requirements
+make ci               # lint + drift checks + tests
 ```
 
 ## Deploy

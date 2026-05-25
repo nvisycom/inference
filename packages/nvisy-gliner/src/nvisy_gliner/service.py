@@ -15,9 +15,19 @@ from nvisy_core.ner.v1 import NerRequest, NerResponse
 
 from nvisy_gliner.label_map import DEFAULT_LABEL_MAP, LabelMap
 
+# BentoML builds the image from this config (`bentoml build` + `containerize`);
+# no hand-written Dockerfile. The requirements file is exported per-service from
+# the workspace lock (scripts/gen_requirements.py); bundled source is scoped by
+# bentofile.yaml's `include`. lock_python_packages=False: the file is already
+# locked + hashed, so BentoML must not re-resolve it.
+image = bentoml.images.Image(python_version="3.12", lock_python_packages=False).requirements_file(
+    "packages/nvisy-gliner/requirements.txt"
+)
+
 
 @bentoml.service(
     name="nvisy-inference-gliner",
+    image=image,
     resources={"cpu": "2"},
     traffic={"timeout": 60},
 )

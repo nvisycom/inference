@@ -51,6 +51,9 @@ jobs:
       - name: OpenAPI specs up to date
         run: uv run python scripts/gen_openapi.py --check
 
+      - name: Service requirements up to date
+        run: uv run python scripts/gen_requirements.py --check
+
   test:
     name: Test
     runs-on: ubuntu-latest
