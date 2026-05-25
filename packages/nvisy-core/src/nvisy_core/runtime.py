@@ -44,12 +44,13 @@ def resolve_model() -> str:
 
 
 def get_logger(name: str) -> logging.Logger:
-    """A logger for a service; honors the LOG_LEVEL env var (default INFO)."""
+    """A logger for a service; honors the LOG_LEVEL env var (default INFO).
+
+    No handler is attached: records propagate to BentoML's configured root
+    handler, so each line is emitted once (in BentoML's format, with its
+    trace/span context). Attaching our own handler would double every line.
+    """
     logger = logging.getLogger(name)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
-        logger.addHandler(handler)
     logger.setLevel(os.getenv("LOG_LEVEL", "INFO").upper())
     return logger
 
