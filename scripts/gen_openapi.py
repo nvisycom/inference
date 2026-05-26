@@ -19,12 +19,12 @@ import json
 import sys
 from pathlib import Path
 
-from nvisy_doctr.service import OcrService
-from nvisy_gliner.service import NerService
-from nvisy_paddle.service import OcrVlService
+from nvisy_ner.service import NerService
+from nvisy_ocr.service import OcrService
+from nvisy_vl.service import OcrVlService
 
 OUT_DIR = Path(__file__).resolve().parent.parent / "docs" / "openapi"
-SERVICES = {"ocr": OcrService, "ner": NerService, "ocrvl": OcrVlService}
+SERVICES = {"ocr": OcrService, "ner": NerService, "vl": OcrVlService}
 
 
 def render(service: object) -> str:

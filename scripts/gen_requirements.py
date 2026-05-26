@@ -22,9 +22,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 # service package -> where its requirements.txt is written (next to pyproject).
 SERVICES = {
-    "nvisy-doctr": ROOT / "packages" / "nvisy-doctr" / "requirements.txt",
-    "nvisy-gliner": ROOT / "packages" / "nvisy-gliner" / "requirements.txt",
-    "nvisy-paddle": ROOT / "packages" / "nvisy-paddle" / "requirements.txt",
+    "nvisy-ocr": ROOT / "packages" / "nvisy-ocr" / "requirements.txt",
+    "nvisy-vl": ROOT / "packages" / "nvisy-vl" / "requirements.txt",
+    "nvisy-ner": ROOT / "packages" / "nvisy-ner" / "requirements.txt",
 }
 
 

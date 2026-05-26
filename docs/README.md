@@ -26,7 +26,7 @@ NER responses carry an `EntityKind` (one of 61 canonical kinds), not a raw model
 label. Each kind belongs to exactly one of 13 `EntityCategory` buckets, derivable
 via `kind.category`, so the wire carries only the kind. Services own the mapping
 between their model's labels and these kinds (e.g.
-[`nvisy_gliner.label_map`](../packages/nvisy-gliner/src/nvisy_gliner/label_map.py)),
+[`nvisy_ner.label_map`](../packages/nvisy-ner/src/nvisy_ner/label_map.py)),
 which is what lets the model be swapped without a runtime change.
 
 The taxonomy mirrors the Rust runtime's `nvisy-ontology` enums, which are the

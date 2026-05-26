@@ -9,12 +9,15 @@ lockstep with the [Nvisy runtime](https://github.com/nvisycom/runtime).
 
 ### Added
 
-- uv workspace with the `nvisy-core`, `nvisy-paddle` (OCR), and `nvisy-gliner`
-  (NER) packages.
-- v1 wire contract for OCR and NER in `nvisy-core`, plus the shared
-  `EntityCategory` / `EntityKind` taxonomy.
-- PaddleOCR (PP-OCRv5) and GLiNER inference wired behind the `recognize`
-  endpoints, with bring-your-own-weights via `NVISY_MODEL_PATH` / `/models`.
+- uv workspace with the `nvisy-core`, `nvisy-ocr` (OCR), `nvisy-vl`
+  (vision-language OCR), and `nvisy-ner` (NER) packages. Services are named
+  for their purpose, not the engine, so the model can be swapped without
+  changing the published image.
+- v1 wire contract for OCR, vision-language OCR, and NER in `nvisy-core`, plus
+  the shared `EntityCategory` / `EntityKind` taxonomy.
+- docTR (OCR), PaddleOCR-VL (vision-language OCR), and GLiNER (NER) inference
+  wired behind the `recognize` endpoints, with bring-your-own-weights via
+  `NVISY_MODEL_PATH` / `/models`.
 - Observability: per-service batch-size metric, and `x-request-id` correlation
   logging.
 - OpenAPI specs and per-service requirements generated from the services into

@@ -1,6 +1,6 @@
 # GLiNER — why we use it for NER
 
-`nvisy-gliner` is the default NER engine. It detects named entities (people,
+`nvisy-ner` (GLiNER) is the default NER engine. It detects named entities (people,
 emails, IBANs, …) in text and is the source of the entity spans the runtime
 redacts.
 
@@ -11,7 +11,7 @@ redacts.
   canonical [`EntityKind`](../../packages/nvisy-core/src/nvisy_core/entity.py)
   types we care about, and the service maps those to GLiNER's label strings (and
   back) via its
-  [`label_map`](../../packages/nvisy-gliner/src/nvisy_gliner/label_map.py). New
+  [`label_map`](../../packages/nvisy-ner/src/nvisy_ner/label_map.py). New
   entity kinds need no retraining — just a label.
 - **Small and CPU-viable.** A compact encoder model that runs comfortably on CPU,
   fitting the self-hosted footprint the ADR targets. No GPU required.
