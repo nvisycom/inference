@@ -1,6 +1,6 @@
 # OCR VLM — the vision-language verification layer
 
-> Status: **shipped** as [`nvisy-paddle`](../../packages/nvisy-paddle)
+> Status: **shipped** as [`nvisy-vl`](../../packages/nvisy-vl)
 > (PaddleOCR-VL). This explains why a VLM belongs in the OCR story and how it
 > relates to the traditional OCR engine.
 
@@ -43,7 +43,7 @@ original otherwise. Prefer running the VLM only on low-confidence regions.
 ## Why a separate, opt-in service
 
 A 0.9B+ VLM wants a GPU and busts the CPU footprint the OCR service targets. So
-the VLM ships as its **own opt-in GPU service** (`nvisy-paddle`), not bundled
+the VLM ships as its **own opt-in GPU service** (`nvisy-vl`), not bundled
 into the CPU OCR container — independent scaling and failure domains, and
 CPU-only deployments simply don't run it. The runtime orchestrates: it calls the
 OCR service for geometry+text and, when verification is requested, the VLM

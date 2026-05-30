@@ -1,0 +1,24 @@
+[project]
+name = "nvisy-ner"
+version = "0.1.0"
+description = "Default NER inference service for nvisy (GLiNER)"
+readme = "README.md"
+requires-python = "==3.12.*"
+license = "Apache-2.0"
+authors = [{ name = "Nvisy" }]
+dependencies = [
+    "bentoml>=1.4.39,<2",
+    "gliner>=0.2.13",
+    "nvisy-core",
+    "prometheus-client>=0.20",
+    # Torch is a transitive dep of gliner; pinned so the image bakes a known
+    # version rather than resolving at build time.
+    "torch>=2.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.6,<0.7"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

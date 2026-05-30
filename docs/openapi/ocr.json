@@ -487,8 +487,8 @@
       "email": "contact@bentoml.com",
       "name": "BentoML Team"
     },
-    "description": "# nvisy-inference-doctr:dev\n\n[![pypi_status](https://img.shields.io/badge/BentoML-1.4.39-informational)](https://pypi.org/project/BentoML)\n[![documentation_status](https://readthedocs.org/projects/bentoml/badge/?version=latest)](https://docs.bentoml.com/)\n[![join_slack](https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack)](https://l.bentoml.com/join-slack-swagger)\n[![BentoML GitHub Repo](https://img.shields.io/github/stars/bentoml/bentoml?style=social)](https://github.com/bentoml/BentoML)\n[![Twitter Follow](https://img.shields.io/twitter/follow/bentomlai?label=Follow%20BentoML&style=social)](https://twitter.com/bentomlai)\n\nThis is a Machine Learning Service created with BentoML.\n\n## Help\n\n* [\ud83d\udcd6 Documentation](https://docs.bentoml.com/en/latest/): Learn how to use BentoML.\n* [\ud83d\udcac Community](https://l.bentoml.com/join-slack-swagger): Join the BentoML Slack community.\n* [\ud83d\udc1b GitHub Issues](https://github.com/bentoml/BentoML/issues): Report bugs and feature requests.\n* Tip: you can also [customize this README](https://docs.bentoml.com/en/latest/reference/bentoml/bento-build-options.html#description).\n",
-    "title": "nvisy-inference-doctr",
+    "description": "# nvisy-inference-ocr:dev\n\n[![pypi_status](https://img.shields.io/badge/BentoML-1.4.39-informational)](https://pypi.org/project/BentoML)\n[![documentation_status](https://readthedocs.org/projects/bentoml/badge/?version=latest)](https://docs.bentoml.com/)\n[![join_slack](https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack)](https://l.bentoml.com/join-slack-swagger)\n[![BentoML GitHub Repo](https://img.shields.io/github/stars/bentoml/bentoml?style=social)](https://github.com/bentoml/BentoML)\n[![Twitter Follow](https://img.shields.io/twitter/follow/bentomlai?label=Follow%20BentoML&style=social)](https://twitter.com/bentomlai)\n\nThis is a Machine Learning Service created with BentoML.\n\n## Help\n\n* [\ud83d\udcd6 Documentation](https://docs.bentoml.com/en/latest/): Learn how to use BentoML.\n* [\ud83d\udcac Community](https://l.bentoml.com/join-slack-swagger): Join the BentoML Slack community.\n* [\ud83d\udc1b GitHub Issues](https://github.com/bentoml/BentoML/issues): Report bugs and feature requests.\n* Tip: you can also [customize this README](https://docs.bentoml.com/en/latest/reference/bentoml/bento-build-options.html#description).\n",
+    "title": "nvisy-inference-ocr",
     "version": "None"
   },
   "openapi": "3.0.2",
@@ -548,7 +548,7 @@
     "/recognize": {
       "post": {
         "description": "",
-        "operationId": "nvisy-inference-doctr__recognize",
+        "operationId": "nvisy-inference-ocr__recognize",
         "requestBody": {
           "content": {
             "application/json": {

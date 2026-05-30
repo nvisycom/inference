@@ -16,7 +16,7 @@ printf "[%s] [MAKE] [$(MAKECMDGOALS)] $(1)\n" "$$(date '+%Y-%m-%d %H:%M:%S')"
 endef
 
 # Services, keyed by package suffix (packages/nvisy-<suffix>).
-SERVICES := doctr gliner
+SERVICES := ocr vl ner
 
 .PHONY: bento
 bento:  ## Install BentoML and all workspace dependencies into the venv.
@@ -60,18 +60,23 @@ check:  ## Fail if generated OpenAPI specs / requirements are stale (CI parity).
 	@uv run python scripts/gen_requirements.py --check
 	@$(call log,Generated artifacts up to date.)
 
-.PHONY: serve-doctr
-serve-doctr:  ## Serve the OCR (docTR) service locally with reload.
-	@$(call log,Serving nvisy-doctr...)
-	@uv run bentoml serve nvisy_doctr.service:OcrService --reload
+.PHONY: serve-ocr
+serve-ocr:  ## Serve the OCR (docTR) service locally with reload.
+	@$(call log,Serving nvisy-ocr...)
+	@uv run bentoml serve nvisy_ocr.service:OcrService --reload
 
-.PHONY: serve-gliner
-serve-gliner:  ## Serve the NER (GLiNER) service locally with reload.
-	@$(call log,Serving nvisy-gliner...)
-	@uv run bentoml serve nvisy_gliner.service:NerService --reload
+.PHONY: serve-vl
+serve-vl:  ## Serve the vision-language OCR (PaddleOCR-VL) service locally with reload.
+	@$(call log,Serving nvisy-vl...)
+	@uv run bentoml serve nvisy_vl.service:OcrVlService --reload
+
+.PHONY: serve-ner
+serve-ner:  ## Serve the NER (GLiNER) service locally with reload.
+	@$(call log,Serving nvisy-ner...)
+	@uv run bentoml serve nvisy_ner.service:NerService --reload
 
 .PHONY: build
-build:  ## Build both Bentos from their bentofiles.
+build:  ## Build all Bentos from their bentofiles.
 	@for s in $(SERVICES); do \
 		$(call log,Building nvisy-$$s...); \
 		uv run bentoml build -f packages/nvisy-$$s/bentofile.yaml . ; \
@@ -79,7 +84,7 @@ build:  ## Build both Bentos from their bentofiles.
 	@$(call log,Bentos built.)
 
 .PHONY: containerize
-containerize:  ## Build + containerize both Bentos into local Docker images.
+containerize:  ## Build + containerize all Bentos into local Docker images.
 	@for s in $(SERVICES); do \
 		$(call log,Containerizing nvisy-$$s...); \
 		uv run bentoml build -f packages/nvisy-$$s/bentofile.yaml --containerize . ; \

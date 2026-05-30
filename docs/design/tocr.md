@@ -1,6 +1,6 @@
 # Traditional OCR (docTR) — why we use it
 
-`nvisy-doctr` is the default OCR engine. It turns an image into a
+`nvisy-ocr` (docTR) is the default OCR engine. It turns an image into a
 `Page → Block → Line → Word` hierarchy with geometry, and is the source of the
 text regions the runtime masks.
 

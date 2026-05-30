@@ -16,10 +16,10 @@ resolution-markers = [
 [manifest]
 members = [
     "nvisy-core",
-    "nvisy-doctr",
-    "nvisy-gliner",
     "nvisy-inference",
-    "nvisy-paddle",
+    "nvisy-ner",
+    "nvisy-ocr",
+    "nvisy-vl",
 ]
 
 [[package]]
@@ -1168,48 +1168,6 @@ dependencies = [
 requires-dist = [{ name = "pydantic", specifier = ">=2.7,<3" }]
 
 [[package]]
-name = "nvisy-doctr"
-version = "0.1.0"
-source = { editable = "packages/nvisy-doctr" }
-dependencies = [
-    { name = "bentoml" },
-    { name = "nvisy-core" },
-    { name = "pillow" },
-    { name = "prometheus-client" },
-    { name = "python-doctr" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "bentoml", specifier = ">=1.4.39,<2" },
-    { name = "nvisy-core", editable = "packages/nvisy-core" },
-    { name = "pillow", specifier = ">=10" },
-    { name = "prometheus-client", specifier = ">=0.20" },
-    { name = "python-doctr", specifier = ">=1.0,<2" },
-]
-
-[[package]]
-name = "nvisy-gliner"
-version = "0.1.0"
-source = { editable = "packages/nvisy-gliner" }
-dependencies = [
-    { name = "bentoml" },
-    { name = "gliner" },
-    { name = "nvisy-core" },
-    { name = "prometheus-client" },
-    { name = "torch" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "bentoml", specifier = ">=1.4.39,<2" },
-    { name = "gliner", specifier = ">=0.2.13" },
-    { name = "nvisy-core", editable = "packages/nvisy-core" },
-    { name = "prometheus-client", specifier = ">=0.20" },
-    { name = "torch", specifier = ">=2.2" },
-]
-
-[[package]]
 name = "nvisy-inference"
 version = "0.1.0"
 source = { virtual = "." }
@@ -1231,9 +1189,51 @@ dev = [
 ]
 
 [[package]]
-name = "nvisy-paddle"
+name = "nvisy-ner"
 version = "0.1.0"
-source = { editable = "packages/nvisy-paddle" }
+source = { editable = "packages/nvisy-ner" }
+dependencies = [
+    { name = "bentoml" },
+    { name = "gliner" },
+    { name = "nvisy-core" },
+    { name = "prometheus-client" },
+    { name = "torch" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "bentoml", specifier = ">=1.4.39,<2" },
+    { name = "gliner", specifier = ">=0.2.13" },
+    { name = "nvisy-core", editable = "packages/nvisy-core" },
+    { name = "prometheus-client", specifier = ">=0.20" },
+    { name = "torch", specifier = ">=2.2" },
+]
+
+[[package]]
+name = "nvisy-ocr"
+version = "0.1.0"
+source = { editable = "packages/nvisy-ocr" }
+dependencies = [
+    { name = "bentoml" },
+    { name = "nvisy-core" },
+    { name = "pillow" },
+    { name = "prometheus-client" },
+    { name = "python-doctr" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "bentoml", specifier = ">=1.4.39,<2" },
+    { name = "nvisy-core", editable = "packages/nvisy-core" },
+    { name = "pillow", specifier = ">=10" },
+    { name = "prometheus-client", specifier = ">=0.20" },
+    { name = "python-doctr", specifier = ">=1.0,<2" },
+]
+
+[[package]]
+name = "nvisy-vl"
+version = "0.1.0"
+source = { editable = "packages/nvisy-vl" }
 dependencies = [
     { name = "bentoml" },
     { name = "nvisy-core" },

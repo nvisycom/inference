@@ -1,138 +1,47 @@
 {
   "components": {
     "schemas": {
-      "Entity": {
+      "BlockKind": {
+        "description": "Layout kind of a block. Mirrors the runtime's ``BlockKind``.",
+        "enum": [
+          "text",
+          "table",
+          "figure",
+          "other"
+        ],
+        "title": "BlockKind",
+        "type": "string"
+      },
+      "BoundingBox": {
+        "description": "Axis-aligned box in image pixels, origin top-left.",
         "properties": {
-          "classProbs": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "maximum": 1.0,
-                  "minimum": 0.0,
-                  "type": "number"
-                },
-                "propertyNames": {
-                  "$ref": "#/components/schemas/EntityKind"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "description": "Per-kind probability distribution for this span, mapped from the model's labels. Present only when the request set returnClassProbs; kinds outside the request are omitted.",
-            "title": "Classprobs"
-          },
-          "end": {
-            "description": "Character offset, exclusive.",
-            "minimum": 0,
-            "title": "End",
-            "type": "integer"
-          },
-          "kind": {
-            "$ref": "#/components/schemas/EntityKind",
-            "description": "The canonical kind this entity was classified as."
-          },
-          "score": {
-            "maximum": 1.0,
+          "height": {
             "minimum": 0.0,
-            "title": "Score",
+            "title": "Height",
             "type": "number"
           },
-          "start": {
-            "description": "Character offset, inclusive.",
-            "minimum": 0,
-            "title": "Start",
-            "type": "integer"
+          "width": {
+            "minimum": 0.0,
+            "title": "Width",
+            "type": "number"
           },
-          "text": {
-            "description": "The matched substring, text[start:end].",
-            "title": "Text",
-            "type": "string"
+          "x": {
+            "title": "X",
+            "type": "number"
+          },
+          "y": {
+            "title": "Y",
+            "type": "number"
           }
         },
         "required": [
-          "text",
-          "kind",
-          "score",
-          "start",
-          "end"
+          "x",
+          "y",
+          "width",
+          "height"
         ],
-        "title": "Entity",
+        "title": "BoundingBox",
         "type": "object"
-      },
-      "EntityKind": {
-        "description": "Specific kind of entity. Each kind maps to one :class:`EntityCategory`.",
-        "enum": [
-          "person_name",
-          "date_of_birth",
-          "government_id",
-          "tax_id",
-          "drivers_license",
-          "passport_number",
-          "national_insurance_number",
-          "vehicle_id",
-          "license_plate",
-          "email_address",
-          "phone_number",
-          "address",
-          "postal_code",
-          "url",
-          "age",
-          "gender",
-          "ethnicity",
-          "religion",
-          "nationality",
-          "citizenship",
-          "language",
-          "payment_card",
-          "card_security_code",
-          "card_expiry",
-          "bank_account",
-          "bank_routing",
-          "iban",
-          "swift_code",
-          "crypto_address",
-          "amount",
-          "medical_id",
-          "insurance_id",
-          "prescription_id",
-          "diagnosis",
-          "medication",
-          "fingerprint",
-          "voiceprint",
-          "retina_scan",
-          "facial_geometry",
-          "password",
-          "api_key",
-          "auth_token",
-          "private_key",
-          "ip_address",
-          "mac_address",
-          "device_id",
-          "username",
-          "coordinates",
-          "geolocation_metadata",
-          "face",
-          "handwriting",
-          "signature",
-          "logo",
-          "barcode",
-          "organization_name",
-          "department_name",
-          "facility_name",
-          "case_number",
-          "internal_id",
-          "date_time",
-          "event",
-          "occupation",
-          "product",
-          "quantity",
-          "unresolved"
-        ],
-        "title": "EntityKind",
-        "type": "string"
       },
       "InternalServerError": {
         "description": "Internal Server Error",
@@ -170,64 +79,6 @@
         "title": "InvalidArgument",
         "type": "object"
       },
-      "NerRequest": {
-        "properties": {
-          "kinds": {
-            "description": "Entity kinds to extract. The service maps these to its model's labels.",
-            "items": {
-              "$ref": "#/components/schemas/EntityKind"
-            },
-            "minItems": 1,
-            "title": "Kinds",
-            "type": "array"
-          },
-          "returnClassProbs": {
-            "default": false,
-            "description": "Include the per-kind probability distribution on each entity.",
-            "title": "Returnclassprobs",
-            "type": "boolean"
-          },
-          "text": {
-            "title": "Text",
-            "type": "string"
-          },
-          "threshold": {
-            "default": 0.5,
-            "description": "Minimum score for an entity to be returned.",
-            "maximum": 1.0,
-            "minimum": 0.0,
-            "title": "Threshold",
-            "type": "number"
-          }
-        },
-        "required": [
-          "text",
-          "kinds"
-        ],
-        "title": "NerRequest",
-        "type": "object"
-      },
-      "NerResponse": {
-        "properties": {
-          "entities": {
-            "items": {
-              "$ref": "#/components/schemas/Entity"
-            },
-            "title": "Entities",
-            "type": "array"
-          },
-          "modelId": {
-            "description": "Identifier of the model that produced these entities (e.g. the loaded GLiNER repo id). Lets the runtime attribute recognition provenance without hardcoding it.",
-            "title": "Modelid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "modelId"
-        ],
-        "title": "NerResponse",
-        "type": "object"
-      },
       "NotFound": {
         "description": "Not Found",
         "properties": {
@@ -244,6 +95,50 @@
           "error"
         ],
         "title": "NotFound",
+        "type": "object"
+      },
+      "Region": {
+        "description": "A layout region the VLM read: its text, kind, geometry, reading order.",
+        "properties": {
+          "bbox": {
+            "$ref": "#/components/schemas/BoundingBox"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Confidence"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/BlockKind",
+            "default": "text",
+            "description": "Layout kind of the region."
+          },
+          "readingOrder": {
+            "description": "0-based reading-order index of the region.",
+            "minimum": 0,
+            "title": "Readingorder",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "bbox",
+          "readingOrder"
+        ],
+        "title": "Region",
         "type": "object"
       },
       "TaskStatusResponse": {
@@ -287,11 +182,46 @@
         "title": "TaskStatusResponse",
         "type": "object"
       },
+      "VlRequest": {
+        "properties": {
+          "image": {
+            "description": "Base64-encoded image bytes (PNG/JPEG/TIFF/WebP).",
+            "title": "Image",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "VlRequest",
+        "type": "object"
+      },
+      "VlResponse": {
+        "properties": {
+          "modelId": {
+            "description": "Identifier of the VLM that produced this result, for provenance.",
+            "title": "Modelid",
+            "type": "string"
+          },
+          "regions": {
+            "items": {
+              "$ref": "#/components/schemas/Region"
+            },
+            "title": "Regions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "modelId"
+        ],
+        "title": "VlResponse",
+        "type": "object"
+      },
       "recognize__Input": {
         "properties": {
           "requests": {
             "items": {
-              "$ref": "#/components/schemas/NerRequest"
+              "$ref": "#/components/schemas/VlRequest"
             },
             "title": "Requests",
             "type": "array"
@@ -310,8 +240,8 @@
       "email": "contact@bentoml.com",
       "name": "BentoML Team"
     },
-    "description": "# nvisy-inference-ner:dev\n\n[![pypi_status](https://img.shields.io/badge/BentoML-1.4.39-informational)](https://pypi.org/project/BentoML)\n[![documentation_status](https://readthedocs.org/projects/bentoml/badge/?version=latest)](https://docs.bentoml.com/)\n[![join_slack](https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack)](https://l.bentoml.com/join-slack-swagger)\n[![BentoML GitHub Repo](https://img.shields.io/github/stars/bentoml/bentoml?style=social)](https://github.com/bentoml/BentoML)\n[![Twitter Follow](https://img.shields.io/twitter/follow/bentomlai?label=Follow%20BentoML&style=social)](https://twitter.com/bentomlai)\n\nThis is a Machine Learning Service created with BentoML.\n\n## Help\n\n* [\ud83d\udcd6 Documentation](https://docs.bentoml.com/en/latest/): Learn how to use BentoML.\n* [\ud83d\udcac Community](https://l.bentoml.com/join-slack-swagger): Join the BentoML Slack community.\n* [\ud83d\udc1b GitHub Issues](https://github.com/bentoml/BentoML/issues): Report bugs and feature requests.\n* Tip: you can also [customize this README](https://docs.bentoml.com/en/latest/reference/bentoml/bento-build-options.html#description).\n",
-    "title": "nvisy-inference-ner",
+    "description": "# nvisy-inference-vl:dev\n\n[![pypi_status](https://img.shields.io/badge/BentoML-1.4.39-informational)](https://pypi.org/project/BentoML)\n[![documentation_status](https://readthedocs.org/projects/bentoml/badge/?version=latest)](https://docs.bentoml.com/)\n[![join_slack](https://badgen.net/badge/Join/BentoML%20Slack/cyan?icon=slack)](https://l.bentoml.com/join-slack-swagger)\n[![BentoML GitHub Repo](https://img.shields.io/github/stars/bentoml/bentoml?style=social)](https://github.com/bentoml/BentoML)\n[![Twitter Follow](https://img.shields.io/twitter/follow/bentomlai?label=Follow%20BentoML&style=social)](https://twitter.com/bentomlai)\n\nThis is a Machine Learning Service created with BentoML.\n\n## Help\n\n* [\ud83d\udcd6 Documentation](https://docs.bentoml.com/en/latest/): Learn how to use BentoML.\n* [\ud83d\udcac Community](https://l.bentoml.com/join-slack-swagger): Join the BentoML Slack community.\n* [\ud83d\udc1b GitHub Issues](https://github.com/bentoml/BentoML/issues): Report bugs and feature requests.\n* Tip: you can also [customize this README](https://docs.bentoml.com/en/latest/reference/bentoml/bento-build-options.html#description).\n",
+    "title": "nvisy-inference-vl",
     "version": "None"
   },
   "openapi": "3.0.2",
@@ -371,7 +301,7 @@
     "/recognize": {
       "post": {
         "description": "",
-        "operationId": "nvisy-inference-ner__recognize",
+        "operationId": "nvisy-inference-vl__recognize",
         "requestBody": {
           "content": {
             "application/json": {
@@ -379,7 +309,7 @@
                 "properties": {
                   "requests": {
                     "items": {
-                      "$ref": "#/components/schemas/NerRequest"
+                      "$ref": "#/components/schemas/VlRequest"
                     },
                     "title": "Requests",
                     "type": "array"
@@ -400,7 +330,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/NerResponse"
+                    "$ref": "#/components/schemas/VlResponse"
                   },
                   "type": "array"
                 }
