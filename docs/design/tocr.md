@@ -19,15 +19,15 @@ that.
   design yields a real `Document → Page → Block → Line → Word` hierarchy with
   per-word geometry — which maps directly onto our contract. This is the precise
   geometry redaction depends on.
-- **PaddleOCR's weak spot.** We started on PaddleOCR PP-OCRv5, but its detection
-  is *line-level*; word boxes are derived post-rectification and degrade on
-  rotation. docTR is strong exactly where PaddleOCR is weak, which is why we
-  replaced it.
 - **CPU-viable.** Runs without a GPU, keeping the OCR service within the
   self-hosted footprint.
 - **Rotation support.** With `assume_straight_pages=False`, docTR returns 4-point
   polygons for skewed/rotated text; our mapping populates the contract's
   `polygon` field for that case.
+- **Versus PaddleOCR.** The other obvious detection+recognition candidate is
+  PaddleOCR (PP-OCRv5), but its detection is *line-level* — word boxes are
+  derived post-rectification and degrade on rotation. docTR is strong exactly
+  where PaddleOCR is weak for our use case.
 
 ## What it gives us
 
@@ -52,3 +52,6 @@ Geometry is always produced by this service; the wire contract is ours, so any
 detection+recognition engine that fills `Page → Block → Line → Word` can replace
 docTR without touching the runtime. Model selection is the `det+rec` pair via
 `NVISY_MODEL_NAME`, with BYO weights via `NVISY_MODEL_PATH`.
+
+A formal SOTA review is tracked at
+[issue #18](https://github.com/nvisycom/inference/issues/18).

@@ -45,3 +45,6 @@ lives in [`nvisy_core.ner.v1`](../../packages/nvisy-core/src/nvisy_core/ner/v1.p
 The label map makes the model an implementation detail: a deployment can bring
 its own GLiNER weights (or a different NER model) and remap labels without any
 change to the wire contract or the runtime.
+
+A formal SOTA review is tracked at
+[issue #20](https://github.com/nvisycom/inference/issues/20).
